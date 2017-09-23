@@ -29,7 +29,7 @@ public class MainController {
 		try {
 			userManagement.createUser(userId, password, realName);
 			httpServletResponse.setHeader("Location", "/login.html");
-			// TODO redirect to login
+			httpServletResponse.sendRedirect("/login.html");
 			return "ok";
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
