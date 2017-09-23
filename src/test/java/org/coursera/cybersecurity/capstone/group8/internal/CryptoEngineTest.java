@@ -2,11 +2,17 @@ package org.coursera.cybersecurity.capstone.group8.internal;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+
 import org.coursera.cybersecurity.capstone.group8.TestConfig;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
@@ -14,10 +20,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestConfig.class})
+@TestPropertySource(locations="classpath:test.properties")
 public class CryptoEngineTest {
+	@Rule
+	public TemporaryFolder tempFolder = new TemporaryFolder();
+	
 	@Autowired
 	private CryptoEngine cryptoEngine;
-
+	
 	@Test
 	public void testHashingWorks() {
 		String hashAsHexString = cryptoEngine.createHash(CryptoEngine.stringToBytes("test"));
@@ -44,7 +54,7 @@ public class CryptoEngineTest {
 		String s = "test";
 		byte[] cipherTextBytes = cryptoEngine.encryptString(s);
 		String cipherTextAsString = CryptoEngine.bytesToHex(cipherTextBytes);
-		System.out.println(CryptoEngine.bytesToHex(cipherTextBytes));
+		System.out.println(cipherTextAsString);
 		System.out.println(cipherTextBytes.length);
 		assertEquals(32, cipherTextBytes.length); // Two blocks, IV + ciphertext
 		String decrypted = cryptoEngine.decryptString(cipherTextBytes);

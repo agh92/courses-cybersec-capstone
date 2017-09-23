@@ -1,27 +1,31 @@
 package org.coursera.cybersecurity.capstone.group8.internal;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Base64;
 
 import javax.annotation.PostConstruct;
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
  * This is where we consolidate all crypto stuff
  */
 public class CryptoEngine {
+	private Logger log = LoggerFactory.getLogger(CryptoEngine.class);
+
 	@Value("${hash.algo:SHA-256}")
 	private String hashAlgo;
 	
@@ -35,27 +39,77 @@ public class CryptoEngine {
     
 	@Value("${key.size.bits:128}")
     private int keySizeBits;
-    private int keySizeBytes;
-
-    // TODO this has to be read from the file, for now randomly generated on every invocation
-    private SecretKey secKey;
+	private int keySizeBytes;
+	
+    private SecretKeySpec secretKeySpec;
 	
 	private SecureRandom secureRandom;
 	
 	private int saltNumberOfBytes = 8;
-
+	
+	@Value("${use.one.time.key:false}")
+	private boolean useOneTimeKey = true;
 	
 	@PostConstruct
-	private void setup() throws NoSuchAlgorithmException, NoSuchPaddingException {
+	private void setup() throws Exception {
+		keySizeBytes = keySizeBits >> 3;
 		secureRandom = new SecureRandom();
 		
 		// If there's no such algo, we want it to blow up on startup
 		digest = MessageDigest.getInstance(hashAlgo);
 		
-	    keySizeBytes = keySizeBits >> 3;
-        KeyGenerator keyGen = KeyGenerator.getInstance(keyGenAlgo);
-        keyGen.init(keySizeBits, secureRandom);
-        secKey = keyGen.generateKey();
+		if (useOneTimeKey && secretKeySpec == null) {
+			log.warn("Using one-time secret key, suitable only for one-time in-memory database");
+			secretKeySpec = createRandomSecretKey();
+		} else {
+			// TODO load from file
+		}
+		if (secretKeySpec == null) 
+			throw new Exception("Cannot obtain encryption key");
+	}
+	
+	public void generateAndWriteKey(File f) throws Exception {
+        SecretKeySpec secretKeySpec = createRandomSecretKey();
+        
+        Base64.Encoder encoder = Base64.getEncoder();
+        Writer out = new FileWriter(f);
+        out.write("-----BEGIN " + keyGenAlgo + " KEY-----\n");
+        out.write(encoder.encodeToString(secretKeySpec.getEncoded()));
+        out.write("\n-----END " + keyGenAlgo + " KEY-----\n");
+        out.close();
+        log.info("New random key written to " + f.getAbsolutePath());
+    }
+
+	private SecretKeySpec createRandomSecretKey() {
+		byte[] key = new byte[keySizeBytes];
+        secureRandom.nextBytes(key);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, keyGenAlgo);
+		return secretKeySpec;
+	}
+	
+	public void setKeyFromFile(File f) throws IOException {
+		this.secretKeySpec = readKeyFromFile(f);
+	}
+	
+	public SecretKeySpec readKeyFromFile(File f) throws IOException {
+		log.info("Reading key from " + f.getAbsolutePath());
+		SecretKeySpec secretKeySpec = null;
+        Base64.Decoder decoder = Base64.getDecoder();
+        StringBuilder sb = new StringBuilder();
+		BufferedReader br = new BufferedReader(new FileReader(f));
+		String line;
+		while ((line = br.readLine()) != null) {
+			if (!line.startsWith("-") && secretKeySpec == null) {
+				byte[] bytes = decoder.decode(line);
+				secretKeySpec = new SecretKeySpec(bytes, keyGenAlgo);
+			}
+			sb.append(line).append("\n");
+		}
+		br.close();
+		log.info("File content:\n" + sb.toString());
+		if (secretKeySpec == null)
+			throw new IOException("No key found in " + f);
+		return secretKeySpec;
 	}
 	
 	/*
@@ -116,24 +170,30 @@ public class CryptoEngine {
         return iv;
 	}
 	
-	public byte[] encryptString(String s) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException {
+	public synchronized byte[] encryptString(String s) throws Exception {
         byte[] byteText = stringToBytes(s);
 		Cipher cipher = Cipher.getInstance(dataCipherAlgo);
 		IvParameterSpec iv = getRandomIv(); // Same as salt
-        cipher.init(Cipher.ENCRYPT_MODE, secKey, iv);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, iv);
         byte[] byteCipherText = cipher.doFinal(byteText);
         return joinBytes(iv.getIV(), byteCipherText);
 	}
 	
-	public String decryptString(byte[] cipherTextBytes) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException {
+	public synchronized String decryptString(byte[] cipherTextBytes) throws Exception {
 		byte[] ivBytes = new byte[keySizeBytes];
 		System.arraycopy(cipherTextBytes, 0, ivBytes, 0, ivBytes.length);
         IvParameterSpec iv = new IvParameterSpec(ivBytes);
         byte[] cipherTextBytesNoIV = new byte[cipherTextBytes.length - ivBytes.length];
         System.arraycopy(cipherTextBytes, ivBytes.length, cipherTextBytesNoIV, 0, cipherTextBytesNoIV.length);
 		Cipher cipher = Cipher.getInstance(dataCipherAlgo);
-        cipher.init(Cipher.DECRYPT_MODE, secKey, iv);
+        cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, iv);
         byte[] bytePlainText = cipher.doFinal(cipherTextBytesNoIV);
         return bytesToString(bytePlainText);
 	}
+
+	public SecretKeySpec getSecretKeySpec() {
+		return secretKeySpec;
+	}
+	
+	
 }
