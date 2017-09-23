@@ -11,26 +11,18 @@ public class UserManagement {
 	
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private CryptoEngine cryptoEngine;
 
 	public User createUser(String userId, String password, String realName) throws Exception {
 		if (userRepository.findOne(userId) != null)
 			throw new Exception("User exists");
-		String saltedPasswordHash = createSaltedPasswordHash(userId, password);
+		String saltedPasswordHash = cryptoEngine.createSaltedPasswordHash(userId, password);
+		log.info("Salted password hash is " + saltedPasswordHash);
 		User user = new User(userId, saltedPasswordHash, realName);
 		userRepository.save(user);
 		log.info("User created: " + user);
 		return user;
-		
-	}
-
-	private String createSaltedPasswordHash(String userId, String password) {
-		String salt = createHash(userId);
-		String saltedPasswordHash = createHash(salt + password);
-		return saltedPasswordHash;
-	}
-
-	private String createHash(String userId) {
-		// TODO SHA-256
-		return null;
 	}
 }

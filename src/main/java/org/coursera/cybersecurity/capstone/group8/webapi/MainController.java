@@ -1,5 +1,7 @@
 package org.coursera.cybersecurity.capstone.group8.webapi;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.coursera.cybersecurity.capstone.group8.internal.UserManagement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -17,13 +20,15 @@ public class MainController {
 	@Autowired
 	private UserManagement userManagement;
 	
+	@ResponseBody
 	@RequestMapping(path="/register", method=RequestMethod.POST)
-	public String register(String userId, String password, String realName) {
+	public String register(String userId, String password, String realName, 
+			HttpServletResponse httpServletResponse) {
 		ensureSecureProtocol();
 		log.info("Creating user " + userId + " " + password + " " + realName);
 		try {
 			userManagement.createUser(userId, password, realName);
-			// TODO change sessionID securely
+			httpServletResponse.setHeader("Location", "/login.html");
 			// TODO redirect to login
 			return "ok";
 		} catch (Exception e) {
@@ -35,6 +40,8 @@ public class MainController {
 	@RequestMapping(path="/login", method=RequestMethod.POST)
 	public void login(String userId, String password) {
 		ensureSecureProtocol();
+		// TODO change sessionID securely after successful login - previous could have been over plain http
+
 	}
 	
 	@RequestMapping(path="/getMessages", method=RequestMethod.GET)

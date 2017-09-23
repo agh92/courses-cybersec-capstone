@@ -1,9 +1,15 @@
 <html>
 <head>
-<title>Homepage</title>
+<title>Login page</title>
 </head>
 <body>
-<a href="./login.html">Login</a><br/>
-<a href="./register.html">Register</a><br/>
+<a href="/index.html">Home</a><br/>
+<a href="/register.html">Register</a><br/>
+
+<form action="/webapi/login" method="post">
+User ID: <input type="text" name="userId" value=""/><br/>
+Password: <input type="password" name="password" value=""/><br/>
+<input type="submit"/><br/>
+</form>
 </body>
 </html>
