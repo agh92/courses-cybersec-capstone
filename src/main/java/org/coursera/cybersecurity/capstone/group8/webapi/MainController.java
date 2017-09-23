@@ -1,6 +1,8 @@
 package org.coursera.cybersecurity.capstone.group8.webapi;
 
 import org.coursera.cybersecurity.capstone.group8.internal.UserManagement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,18 +12,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/webapi")
 public class MainController {
+	private Logger log = LoggerFactory.getLogger(MainController.class);
+
 	@Autowired
 	private UserManagement userManagement;
 	
 	@RequestMapping(path="/register", method=RequestMethod.POST)
 	public String register(String userId, String password, String realName) {
 		ensureSecureProtocol();
+		log.info("Creating user " + userId + " " + password + " " + realName);
 		try {
 			userManagement.createUser(userId, password, realName);
 			// TODO change sessionID securely
 			// TODO redirect to login
 			return "ok";
 		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			return handleError(e);
 		}
 	}

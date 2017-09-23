@@ -2,8 +2,10 @@ package org.coursera.cybersecurity.capstone.group8.internal.data;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="users") // Because "user" is a keyword in SQL
 public class User {
 	@Id
 	private String id;
@@ -43,5 +45,10 @@ public class User {
 	
 	public void setRealName(String realName) {
 		this.realName = realName;
+	}
+	
+	@Override
+	public String toString() {
+		return "User[" + id + "]";
 	}
 }
