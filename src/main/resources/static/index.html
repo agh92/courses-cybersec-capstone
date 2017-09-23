@@ -15,6 +15,18 @@
 
 <a href="https://github.com/alx27coursera/cybersec-capstone">GitHub repo</a>
 
+<h1>Threat model</h1>
+
+<p>Our assumptions are:
+<ul>
+<li>Adversary can see all unencrypted network traffic of legitimate users</li>
+<li>Adversary can see the database dump</li>
+<li>Adversary cannot see the encryption key file, which is only readable to the user we run the server with</li>
+<li>Adversary cannot see the memory used by our process</li>
+<li>Leaking metadata (e.g. the fact that user A sent a message to user B) is not a problem, as long as the content of the message is secure</li>
+</ul>
+</p>
+
 <h1>Design considerations</h1>
 
 <ul>
