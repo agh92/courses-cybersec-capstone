@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Message List</title>
+</head>
+<body>
+<table style="border: solid">
+    <tr>
+        <th>User</th>
+        <th>Time stamp</th>
+    </tr>
+    <tr th:each="message : ${messages}">
+        <td th:text="${message.toUserId}">Bob</td>
+        <td th:text="${message.timestamp}">1234135234</td>
+    </tr>
+</table>
+</body>
+</html>
