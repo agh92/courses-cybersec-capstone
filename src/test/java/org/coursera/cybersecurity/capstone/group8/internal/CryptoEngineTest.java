@@ -38,4 +38,31 @@ public class CryptoEngineTest {
 		String saltedPassword2 = cryptoEngine.createSaltedPasswordHash(CryptoEngine.stringToBytes("salt2"), "password");
 		assertNotEquals(saltedPassword1, saltedPassword2);
 	}
+	
+	@Test
+	public void testEncryptDecrypt() throws Exception {
+		String s = "test";
+		byte[] cipherTextBytes = cryptoEngine.encryptString(s);
+		String cipherTextAsString = CryptoEngine.bytesToHex(cipherTextBytes);
+		System.out.println(CryptoEngine.bytesToHex(cipherTextBytes));
+		System.out.println(cipherTextBytes.length);
+		assertEquals(32, cipherTextBytes.length); // Two blocks, IV + ciphertext
+		String decrypted = cryptoEngine.decryptString(cipherTextBytes);
+		assertEquals(s, decrypted);
+	}
+	
+	@Test
+	public void testEncryptEveryTimeDifferent() throws Exception {
+		String s = "test";
+		byte[] cipherTextBytes1 = cryptoEngine.encryptString(s);
+		String cipherTextAsString1 = CryptoEngine.bytesToHex(cipherTextBytes1);
+		byte[] cipherTextBytes2 = cryptoEngine.encryptString(s);
+		String cipherTextAsString2 = CryptoEngine.bytesToHex(cipherTextBytes2);
+
+		System.out.println(cipherTextAsString1);
+		System.out.println(cipherTextAsString2);
+		
+		// Because for every single encription IV is random and different
+		assertNotEquals(cipherTextAsString1, cipherTextAsString2);
+	}
 }
