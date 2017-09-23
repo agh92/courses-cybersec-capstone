@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Scanner;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
@@ -62,7 +63,9 @@ public class CryptoEngine {
 			log.warn("Using one-time secret key, suitable only for one-time in-memory database");
 			secretKeySpec = createRandomSecretKey();
 		} else {
-			// TODO load from file
+			// TODO dynamically load file name/path or read from some config file - to be determined
+			Scanner scan = new Scanner(new File("key.txt"));
+			secretKeySpec = new SecretKeySpec(stringToBytes(scan.next()), keyGenAlgo);
 		}
 		if (secretKeySpec == null) 
 			throw new Exception("Cannot obtain encryption key");
