@@ -1,9 +1,16 @@
 <html>
 <head>
-<title>Homepage</title>
+<title>Registration</title>
 </head>
 <body>
-<a href="./login.html">Login</a><br/>
-<a href="./register.html">Register</a><br/>
+<a href="./index.html">Homepage</a><br/>
+
+<form action="/webapi/register" method="post">
+User ID: <input type="text" name="userId" value=""/><br/>
+Password: <input type="password" name="password" value=""/><br/>
+Real name: <input type="text" name="realName" value=""/><br/>
+<input type="hidden"  name="${_csrf.parameterName}"   value="${_csrf.token}"/>
+<input type="submit"/><br/>
+</form>
 </body>
 </html>

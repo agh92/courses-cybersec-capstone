@@ -14,15 +14,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-                .antMatchers("/", "/home").permitAll()
-                .anyRequest().authenticated()
+                .antMatchers("/", "/register.html", "/webapi/register", "/webapi/login").permitAll()
+                .anyRequest().anonymous()
                 .and()
             .formLogin()
-                .loginPage("/login")
+                .loginPage("/login.html")
                 .permitAll()
                 .and()
             .logout()
-                .permitAll();
+                .permitAll()
+            .and().csrf().disable(); // TODO see if it can be enabled later
     }
 
     @Autowired
