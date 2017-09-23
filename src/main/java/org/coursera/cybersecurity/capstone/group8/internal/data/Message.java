@@ -5,6 +5,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+/*
+ * This is a direct reflection of what is stored in the database, 
+ * hence message is an encrypted byte array.
+ */
 @Entity
 public class Message {
 	@Id
@@ -13,7 +17,8 @@ public class Message {
 	
 	private String fromUserId;
 	private String toUserId;
-	private String encryptedMessage;
+	private long timestamp;
+	private byte[] encryptedMessage;
 
 	public long getId() {
 		return id;
@@ -39,11 +44,19 @@ public class Message {
 		this.toUserId = toUserId;
 	}
 	
-	public String getEncryptedMessage() {
+	public byte[] getEncryptedMessage() {
 		return encryptedMessage;
 	}
 	
-	public void setEncryptedMessage(String encryptedMessage) {
+	public void setEncryptedMessage(byte[] encryptedMessage) {
 		this.encryptedMessage = encryptedMessage;
+	}
+
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
 	}
 }
