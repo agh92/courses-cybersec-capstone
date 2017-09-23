@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class UserManagement {
 	private Logger log = LoggerFactory.getLogger(UserManagement.class);
-	
+
 	@Autowired
 	private UserRepository userRepository;
 	
@@ -18,9 +18,10 @@ public class UserManagement {
 	public User createUser(String userId, String password, String realName) throws Exception {
 		if (userRepository.findOne(userId) != null)
 			throw new Exception("User exists");
-		String saltedPasswordHash = cryptoEngine.createSaltedPasswordHash(userId, password);
+		byte[] saltBytes = cryptoEngine.getRandomSalt();
+		String saltedPasswordHash = cryptoEngine.createSaltedPasswordHash(saltBytes, password);
 		log.info("Salted password hash is " + saltedPasswordHash);
-		User user = new User(userId, saltedPasswordHash, realName);
+		User user = new User(userId, saltedPasswordHash, realName, saltBytes);
 		userRepository.save(user);
 		log.info("User created: " + user);
 		return user;

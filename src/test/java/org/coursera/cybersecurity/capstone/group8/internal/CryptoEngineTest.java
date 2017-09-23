@@ -20,22 +20,22 @@ public class CryptoEngineTest {
 
 	@Test
 	public void testHashingWorks() {
-		String hashAsHexString = cryptoEngine.createHash("test");
+		String hashAsHexString = cryptoEngine.createHash(CryptoEngine.stringToBytes("test"));
 		assertEquals("9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", hashAsHexString);
 		assertEquals(64, hashAsHexString.length());
 	}
 
 	@Test
 	public void testSaltedPasswordWorks() {
-		String saltedPassword = cryptoEngine.createSaltedPasswordHash("user", "password");
-		assertEquals(128, saltedPassword.length());
-		assertEquals("04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fbab3327d85463f0feb5574b6fb6fd5ee2f388fbea4f0c0c28707d65c8d7ec78ea", saltedPassword);
+		String saltedPassword = cryptoEngine.createSaltedPasswordHash(CryptoEngine.stringToBytes("salt"), "password");
+		assertEquals(64, saltedPassword.length());
+		assertEquals("13601bda4ea78e55a07b98866d2be6be0744e3866f13c00c811cab608a28f322", saltedPassword);
 	}
 
 	@Test
 	public void testDifferentUsersHaveDifferentSaltedPasswords() {
-		String saltedPassword1 = cryptoEngine.createSaltedPasswordHash("user1", "password");
-		String saltedPassword2 = cryptoEngine.createSaltedPasswordHash("user2", "password");
+		String saltedPassword1 = cryptoEngine.createSaltedPasswordHash(CryptoEngine.stringToBytes("salt1"), "password");
+		String saltedPassword2 = cryptoEngine.createSaltedPasswordHash(CryptoEngine.stringToBytes("salt2"), "password");
 		assertNotEquals(saltedPassword1, saltedPassword2);
 	}
 }
