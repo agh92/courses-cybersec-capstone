@@ -1,5 +1,6 @@
 package org.coursera.cybersecurity.capstone.group8.internal;
 
+import org.coursera.cybersecurity.capstone.group8.internal.data.DecryptedMessage;
 import org.coursera.cybersecurity.capstone.group8.internal.data.Message;
 import org.coursera.cybersecurity.capstone.group8.internal.data.MessageRepository;
 import org.coursera.cybersecurity.capstone.group8.internal.data.User;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserManagement implements UserDetailsService {
@@ -50,9 +52,14 @@ public class UserManagement implements UserDetailsService {
 		return user;
 	}
 
-	public List<Message> getMessagesForUser(User user) {
+	public List<DecryptedMessage> getMessagesForUser(User user) throws Exception {
 		List<Message> encryptedMessages = msgRepository.findByToUserIdOrderByTimestampAsc(user.getId());
-		return encryptedMessages;
+		List<DecryptedMessage> decryptedMessages = new ArrayList<>(encryptedMessages.size());
+		for (Message m : encryptedMessages) {
+			DecryptedMessage dm = cryptoEngine.decryptMessage(m);
+			decryptedMessages.add(dm);
+		}
+		return decryptedMessages;
 	}
 
 	@Override

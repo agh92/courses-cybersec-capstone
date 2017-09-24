@@ -2,6 +2,7 @@ package org.coursera.cybersecurity.capstone.group8.webapi;
 
 
 import org.coursera.cybersecurity.capstone.group8.internal.UserManagement;
+import org.coursera.cybersecurity.capstone.group8.internal.data.DecryptedMessage;
 import org.coursera.cybersecurity.capstone.group8.internal.data.Message;
 import org.coursera.cybersecurity.capstone.group8.internal.data.User;
 import org.slf4j.Logger;
@@ -75,18 +76,19 @@ public class MainController {
 		ensureSecureProtocol();
 		log.info("messageList for " + user);
 
-        List<Message> allMsgs = userManagement.getMessagesForUser(user);
+		try {
+	        List<DecryptedMessage> allMsgs = userManagement.getMessagesForUser(user);
+	
+	        WebContext ctx = new WebContext(request, response, request.getServletContext());
+	        ctx.setVariable("messages", allMsgs);
+	        ctx.setVariable("userid", user.getId());
+	        ctx.setVariable("username", user.getRealName());
 
-        WebContext ctx = new WebContext(request, response, request.getServletContext());
-        ctx.setVariable("messages", allMsgs);
-        ctx.setVariable("userid", user.getId());
-        ctx.setVariable("username", user.getRealName());
-
-        try {
             templateEngine.process("/message_list.html", ctx, response.getWriter());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
     }
 	
 	@RequestMapping(path="/sendMessage", method=RequestMethod.POST)
