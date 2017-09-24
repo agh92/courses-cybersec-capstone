@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -27,10 +28,14 @@ public class MainController {
 
 	@Autowired
 	private UserManagement userManagement;
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@ResponseBody
 	@RequestMapping(path="/register", method=RequestMethod.POST)
 	public String register(String userId, String password, String password2, String realName, 
+			String secretQuestion, String secretAnswer, 
 			HttpServletResponse httpServletResponse) {
 		ensureSecureProtocol();
 		log.info("Creating user " + userId);
@@ -39,12 +44,39 @@ public class MainController {
 				throw new Exception("Passwords don't match");
 			checkPassword(password);
 			checkUsername(userId);
+			checkSecretAnswer(secretAnswer);
 			if (realName == null || realName.trim().length() == 0)
 				realName = userId;
 			realName = sanitizeRealName(realName);
-			userManagement.createUser(userId, password, realName);
+			userManagement.createUser(userId, password, realName, secretQuestion, secretAnswer);
 			httpServletResponse.setHeader("Location", "/login.html");
 			httpServletResponse.sendRedirect("/login.html");
+			return "ok";
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return handleError(e);
+		}
+	}
+
+	private void checkSecretAnswer(String secretAnswer) {
+		// TODO ensure secret answer constraints
+	}
+
+	@ResponseBody
+	@RequestMapping(path="/passwordReset", method=RequestMethod.POST)
+	public String passwordReset(String username, String password, String password2, 
+			String secretAnswer, HttpServletResponse httpServletResponse) {
+		try {
+			checkPassword(password);
+			checkUsername(username);
+			User user = (User) userManagement.loadUserByUsername(username);
+			if (!passwordEncoder.matches(secretAnswer, user.getSecretHashedAnswer())) 
+				throw new Exception("Secret answer doesn't match");
+			if (!password.equals(password2))
+				throw new Exception("New passwords don't match");
+			user.setSaltedPasswordHash(passwordEncoder.encode(password));
+			userManagement.persist(user);
+			log.info("Password reset successful for " + user);
 			return "ok";
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);

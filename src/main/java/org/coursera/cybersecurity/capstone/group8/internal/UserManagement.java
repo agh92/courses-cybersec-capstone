@@ -40,12 +40,13 @@ public class UserManagement implements UserDetailsService {
 	@Autowired
     private MessageRepository msgRepository;
 
-	public User createUser(String userId, String password, String realName) throws Exception {
+	public User createUser(String userId, String password, String realName, 
+			String secretQuestion, String secretAnswer) throws Exception {
 		if (userRepository.findOne(userId) != null)
 			throw new Exception("User exists");
 		String saltedPasswordHash = passwordEncoder.encode(password);
-		log.info("Salted password hash is " + saltedPasswordHash);
-		User user = new User(userId, saltedPasswordHash, realName);
+		String secretHashedAnswer = passwordEncoder.encode(secretAnswer);
+		User user = new User(userId, saltedPasswordHash, realName, secretQuestion, secretHashedAnswer);
 		userRepository.save(user);
 		log.info("User created: " + user);
 		return user;
@@ -67,11 +68,15 @@ public class UserManagement implements UserDetailsService {
 		UserDetails userDetails = userRepository.findOne(username);
 		log.info("User details: " + userDetails);
 		if (userDetails == null)
-			throw new UsernameNotFoundException(username);
+			throw new UsernameNotFoundException("Username not found: \"" + username + "\"");
 		return userDetails;
 	}
 
 	public boolean userExists(String userId) {
 		return userRepository.findOne(userId) != null;
+	}
+
+	public void persist(User user) {
+		userRepository.save(user);
 	}
 }

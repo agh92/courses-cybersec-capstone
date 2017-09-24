@@ -19,15 +19,20 @@ public class User implements UserDetails {
 	
 	private String saltedPasswordHash;
 	private String realName;
+	private String secretQuestion;
+	private String secretHashedAnswer;
 	
 	public User() {
 		
 	}
 
-	public User(String userId, String saltedPasswordHash, String realName) {
+	public User(String userId, String saltedPasswordHash, String realName, 
+			String secretQuestion, String secretHashedAnswer) {
 		this.id = userId;
 		this.saltedPasswordHash = saltedPasswordHash;
 		this.realName = realName;
+		this.secretQuestion = secretQuestion;
+		this.secretHashedAnswer = secretHashedAnswer;
 	}
 
 	public String getId() {
@@ -92,5 +97,21 @@ public class User implements UserDetails {
 	@Override
 	public boolean isEnabled() {
 		return true;
+	}
+
+	public String getSecretQuestion() {
+		return secretQuestion;
+	}
+
+	public void setSecretQuestion(String secretQuestion) {
+		this.secretQuestion = secretQuestion;
+	}
+
+	public String getSecretHashedAnswer() {
+		return secretHashedAnswer;
+	}
+
+	public void setSecretHashedAnswer(String secretHashedAnswer) {
+		this.secretHashedAnswer = secretHashedAnswer;
 	}
 }
