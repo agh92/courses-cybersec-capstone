@@ -2,10 +2,9 @@ package org.coursera.cybersecurity.capstone.group8.internal;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
-
 import org.coursera.cybersecurity.capstone.group8.TestConfig;
-import org.junit.Before;
+import org.coursera.cybersecurity.capstone.group8.internal.data.DecryptedMessage;
+import org.coursera.cybersecurity.capstone.group8.internal.data.Message;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -74,5 +73,23 @@ public class CryptoEngineTest {
 		
 		// Because for every single encription IV is random and different
 		assertNotEquals(cipherTextAsString1, cipherTextAsString2);
+	}
+	
+	@Test
+	public void testEncryptDecryptMessage() throws Exception {
+		DecryptedMessage decryptedSrc = new DecryptedMessage();
+		decryptedSrc.setId(1);
+		decryptedSrc.setFromUserId("fromUser");
+		decryptedSrc.setToUserId("toUser");
+		decryptedSrc.setTimestamp(12345);
+		decryptedSrc.setPlainTextMessage("plain text");
+		Message encrypted = cryptoEngine.encryptMessage(decryptedSrc);
+		assertEquals(32, encrypted.getEncryptedMessage().length);
+		DecryptedMessage decrypted = cryptoEngine.decryptMessage(encrypted);
+		assertEquals(decryptedSrc.getId(), decrypted.getId());
+		assertEquals(decryptedSrc.getFromUserId(), decrypted.getFromUserId());
+		assertEquals(decryptedSrc.getToUserId(), decrypted.getToUserId());
+		assertEquals(decryptedSrc.getTimestamp(), decrypted.getTimestamp());
+		assertEquals(decryptedSrc.getPlainTextMessage(), decrypted.getPlainTextMessage());
 	}
 }

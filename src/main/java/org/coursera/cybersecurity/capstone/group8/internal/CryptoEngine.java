@@ -17,6 +17,8 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.coursera.cybersecurity.capstone.group8.internal.data.DecryptedMessage;
+import org.coursera.cybersecurity.capstone.group8.internal.data.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -198,5 +200,15 @@ public class CryptoEngine {
 		return secretKeySpec;
 	}
 	
+	public Message encryptMessage(DecryptedMessage decryptedMsg) throws Exception {
+		byte[] cipherText = encryptString(decryptedMsg.getPlainTextMessage());
+		Message encryptedMsg = new Message(decryptedMsg, cipherText);
+		return encryptedMsg;
+	}
 	
+	public DecryptedMessage decryptMessage(Message encryptedMsg) throws Exception {
+		String plainText = decryptString(encryptedMsg.getEncryptedMessage());
+		DecryptedMessage decryptedMsg = new DecryptedMessage(encryptedMsg, plainText);
+		return decryptedMsg;
+	}
 }

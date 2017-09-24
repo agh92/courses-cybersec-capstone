@@ -5,9 +5,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-/*
+import org.coursera.cybersecurity.capstone.group8.internal.CryptoEngine;
+
+/**
  * This is a direct reflection of what is stored in the database, 
- * hence message is an encrypted byte array.
+ * hence message is an encrypted byte array. Conversion to DecryptedMessage 
+ * done by CryptoEngine.
+ * 
+ * @see DecryptedMessage
+ * @see CryptoEngine
  */
 @Entity
 public class Message {
@@ -19,6 +25,18 @@ public class Message {
 	private String toUserId;
 	private long timestamp;
 	private byte[] encryptedMessage;
+	
+	public Message() {
+		
+	}
+
+	public Message(DecryptedMessage decryptedMsg, byte[] cipherText) {
+		this.id = decryptedMsg.getId();
+		this.fromUserId = decryptedMsg.getFromUserId();
+		this.toUserId = decryptedMsg.getToUserId();
+		this.timestamp = decryptedMsg.getTimestamp();
+		this.encryptedMessage = cipherText;
+	}
 
 	public long getId() {
 		return id;
