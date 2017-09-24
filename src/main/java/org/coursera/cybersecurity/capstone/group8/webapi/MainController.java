@@ -47,13 +47,6 @@ public class MainController {
 		}
 	}
 	
-	@RequestMapping(path="/login", method=RequestMethod.POST)
-	public void login(String userId, String password) {
-		ensureSecureProtocol();
-		// TODO change sessionID securely after successful login - previous could have been over plain http
-
-	}
-	
 	@RequestMapping(path="/getMessages", method=RequestMethod.GET)
 	public void getMessages(User user) {
 		ensureSecureProtocol();

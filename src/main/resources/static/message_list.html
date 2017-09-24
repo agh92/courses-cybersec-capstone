@@ -5,6 +5,8 @@
     <title>Message List</title>
 </head>
 <body>
+You are authenticated as USERNAME
+<hr/>
 <table style="border: solid">
     <tr>
         <th>User</th>
@@ -15,5 +17,19 @@
         <td th:text="${message.timestamp}">1234135234</td>
     </tr>
 </table>
+
+<hr/>
+
+<form action="/webapi/sendMessage" method="post">
+    To: <input type="text" name="recipientId" value=""/><br>
+    Message:<br>
+    <textarea name="message"></textarea><br>
+    <input type="submit" value="send">
+</form>
+
+<hr/>
+
+<a href="/webapi/logout">Logout</a>
+
 </body>
 </html>

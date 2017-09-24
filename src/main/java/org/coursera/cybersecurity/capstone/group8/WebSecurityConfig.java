@@ -15,19 +15,28 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
             .authorizeRequests()
                 .antMatchers("/", "/index.html", "/register.html", "/webapi/register", "/webapi/login").permitAll()
-                .anyRequest().anonymous()
+                .anyRequest().authenticated()
                 .and()
             .formLogin()
                 .loginPage("/login.html")
+                .loginProcessingUrl("/webapi/login")
+                .usernameParameter("username")
+                .passwordParameter("password")
+                .defaultSuccessUrl("/message_list.html")
                 .permitAll()
                 .and()
             .logout()
+            	.logoutUrl("/webapi/logout")
+            	.logoutSuccessUrl("/")
+            	.invalidateHttpSession(true)
+//            	.deleteCookies(...)
                 .permitAll()
             .and().csrf().disable(); // TODO see if it can be enabled later
     }
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    	// TODO set up authentication from db
         auth
             .inMemoryAuthentication()
                 .withUser("user").password("password").roles("USER");
