@@ -2,6 +2,7 @@ package org.coursera.cybersecurity.capstone.group8;
 
 import org.coursera.cybersecurity.capstone.group8.internal.CryptoEngine;
 import org.coursera.cybersecurity.capstone.group8.internal.UserManagement;
+import org.coursera.cybersecurity.capstone.group8.internal.data.MessageRepository;
 import org.coursera.cybersecurity.capstone.group8.internal.data.UserRepository;
 import org.springframework.context.annotation.Bean;
 import static org.mockito.Mockito.mock;
@@ -20,5 +21,10 @@ public class TestConfig {
 	@Bean
 	public UserRepository getUserRepository() {
 		return mock(UserRepository.class);
+	}
+
+	@Bean
+	public MessageRepository getMessageRepository() {
+		return mock(MessageRepository.class);
 	}
 }
