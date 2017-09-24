@@ -5,6 +5,9 @@ import org.coursera.cybersecurity.capstone.group8.internal.UserManagement;
 import org.coursera.cybersecurity.capstone.group8.internal.data.MessageRepository;
 import org.coursera.cybersecurity.capstone.group8.internal.data.UserRepository;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import static org.mockito.Mockito.mock;
 
 public class TestConfig {
@@ -27,4 +30,9 @@ public class TestConfig {
 	public MessageRepository getMessageRepository() {
 		return mock(MessageRepository.class);
 	}
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

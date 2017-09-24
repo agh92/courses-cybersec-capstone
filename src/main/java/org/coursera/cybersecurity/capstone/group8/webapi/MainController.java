@@ -3,10 +3,11 @@ package org.coursera.cybersecurity.capstone.group8.webapi;
 
 import org.coursera.cybersecurity.capstone.group8.internal.UserManagement;
 import org.coursera.cybersecurity.capstone.group8.internal.data.Message;
+import org.coursera.cybersecurity.capstone.group8.internal.data.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -32,11 +33,13 @@ public class MainController {
 
 	@ResponseBody
 	@RequestMapping(path="/register", method=RequestMethod.POST)
-	public String register(String userId, String password, String realName, 
+	public String register(String userId, String password, String password2, String realName, 
 			HttpServletResponse httpServletResponse) {
 		ensureSecureProtocol();
-		log.info("Creating user " + userId + " " + password + " " + realName);
+		log.info("Creating user " + userId);
 		try {
+			if (!password.equals(password2))
+				throw new Exception("Passwords don't match");
 			userManagement.createUser(userId, password, realName);
 			httpServletResponse.setHeader("Location", "/login.html");
 			httpServletResponse.sendRedirect("/login.html");
@@ -48,11 +51,11 @@ public class MainController {
 	}
 	
 	@RequestMapping(path="/getMessages", method=RequestMethod.GET)
-	public void getMessages(User user) {
+	public void getMessages(@AuthenticationPrincipal User user) {
 		ensureSecureProtocol();
 	}
 
-    //TODO method to loead messages into the template to display them to the user -- still need some work
+    //TODO method to load messages into the template to display them to the user -- still need some work
     public void processMessages( HttpServletRequest request, HttpServletResponse response,
                                  ServletContext servletContext, TemplateEngine templateEngine) {
 
@@ -69,8 +72,9 @@ public class MainController {
     }
 	
 	@RequestMapping(path="/sendMessage", method=RequestMethod.POST)
-	public void sendMessage(User user, String recipientId, String message) {
+	public void sendMessage(@AuthenticationPrincipal User user, String recipientId, String message) {
 		ensureSecureProtocol();
+		log.info("Sending message from " + user + " to " + recipientId);
 	}
 	
 	private void ensureSecureProtocol() {

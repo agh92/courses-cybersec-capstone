@@ -7,7 +7,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Scanner;
@@ -28,11 +27,6 @@ import org.springframework.beans.factory.annotation.Value;
  */
 public class CryptoEngine {
 	private Logger log = LoggerFactory.getLogger(CryptoEngine.class);
-
-	@Value("${hash.algo:SHA-256}")
-	private String hashAlgo;
-	
-	private MessageDigest digest;
 	
 	@Value("${cipher.algo:AES/CBC/PKCS5Padding}")
 	private String dataCipherAlgo;
@@ -61,9 +55,6 @@ public class CryptoEngine {
 	private void setup() throws Exception {
 		keySizeBytes = keySizeBits >> 3;
 		secureRandom = new SecureRandom();
-		
-		// If there's no such algo, we want it to blow up on startup
-		digest = MessageDigest.getInstance(hashAlgo);
 		
 		if (useOneTimeKey && secretKeySpec == null) {
 			log.warn("Using one-time secret key, suitable only for one-time in-memory database");
@@ -144,23 +135,12 @@ public class CryptoEngine {
 	public static String bytesToString(byte[] bytes) {
 		return new String(bytes, StandardCharsets.UTF_8);
 	}
-
-	public String createSaltedPasswordHash(final byte[] salt, final String password) {
-		final byte[] passwordAsBytes = stringToBytes(password);
-		return createHash(joinBytes(salt, passwordAsBytes));
-	}
 	
 	public byte[] joinBytes(byte[] bb1, byte[] bb2) {
 		final byte[] joined = new byte[bb1.length + bb2.length];
 		System.arraycopy(bb1, 0, joined, 0, bb1.length);
 		System.arraycopy(bb2, 0, joined, bb1.length, bb2.length);
 		return joined;
-	}
-
-	public synchronized String createHash(byte[] bytes) {
-		digest.reset();
-		byte[] hash = digest.digest(bytes);
-		return bytesToHex(hash);
 	}
 	
 	public static String bytesToHex(byte[] hash) {

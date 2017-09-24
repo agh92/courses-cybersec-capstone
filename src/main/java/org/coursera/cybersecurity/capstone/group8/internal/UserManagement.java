@@ -7,11 +7,27 @@ import org.coursera.cybersecurity.capstone.group8.internal.data.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
-public class UserManagement {
+public class UserManagement implements UserDetailsService {
+	@SuppressWarnings("serial")
+	public static final GrantedAuthority AUTHORITY_USER = new GrantedAuthority() {
+		@Override
+		public String getAuthority() {
+			return "USER";
+		}
+	};
+
 	private Logger log = LoggerFactory.getLogger(UserManagement.class);
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -26,7 +42,7 @@ public class UserManagement {
 		if (userRepository.findOne(userId) != null)
 			throw new Exception("User exists");
 		byte[] saltBytes = cryptoEngine.getRandomSalt();
-		String saltedPasswordHash = cryptoEngine.createSaltedPasswordHash(saltBytes, password);
+		String saltedPasswordHash = passwordEncoder.encode(password);
 		log.info("Salted password hash is " + saltedPasswordHash);
 		User user = new User(userId, saltedPasswordHash, realName, saltBytes);
 		userRepository.save(user);
@@ -37,4 +53,14 @@ public class UserManagement {
 	public List<Message> getMessagesForUserID(String id){
 	    return msgRepository.findByToUserIdOrderByTimestampAsc(id);
     }
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		log.info("Loading user details for \"" + username + "\"");
+		UserDetails userDetails = userRepository.findOne(username);
+		log.info("User details: " + userDetails);
+		if (userDetails == null)
+			throw new UsernameNotFoundException(username);
+		return userDetails;
+	}
 }
