@@ -53,6 +53,10 @@ public class CryptoEngine {
 	@Value("${use.one.time.key:false}")
 	private boolean useOneTimeKey = true;
 	
+	// This syntax means "look up encryption.key.path property in application.properties, or use default key.txt
+	@Value("${encryption.key.path:key.txt}")
+	private String encryptionKeyPath;
+	
 	@PostConstruct
 	private void setup() throws Exception {
 		keySizeBytes = keySizeBits >> 3;
@@ -66,8 +70,9 @@ public class CryptoEngine {
 			secretKeySpec = createRandomSecretKey();
 		} else {
 			// TODO dynamically load file name/path or read from some config file - to be determined
-			Scanner scan = new Scanner(new File("key.txt"));
+			Scanner scan = new Scanner(new File(encryptionKeyPath));
 			secretKeySpec = new SecretKeySpec(stringToBytes(scan.next()), keyGenAlgo);
+			scan.close();
 		}
 		if (secretKeySpec == null) 
 			throw new Exception("Cannot obtain encryption key");
