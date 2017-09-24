@@ -10,16 +10,12 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import org.springframework.beans.factory.annotation.Value;
 
 public class DbTools {
-
-   @PersistenceContext
-   private EntityManager em;
 	   
-//	@Value("${spring.datasource.url}")
-	private String url = "jdbc:derby:memory:myDB";
+	@Value("${spring.datasource.url}")
+	private String url;
 	
 	public String backup() throws SQLException {
 		StringBuilder sb = new StringBuilder();
