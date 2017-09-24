@@ -3,3 +3,4 @@
 ## Team Members
 - Alexey
 - Andrés
+- Aamir Nadeem
