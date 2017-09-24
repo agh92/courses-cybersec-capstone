@@ -9,10 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 
@@ -31,6 +29,9 @@ public class MainController {
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+    private TemplateEngine templateEngine;
 
 	@ResponseBody
 	@RequestMapping(path="/register", method=RequestMethod.POST)
@@ -97,27 +98,34 @@ public class MainController {
 		// TODO enforce strength requirements
 	}
 
-	@RequestMapping(path="/messageList", method=RequestMethod.GET)
-    //TODO method to load messages into the template to display them to the user -- still need some work
-    public void processMessages(@AuthenticationPrincipal User user, HttpServletRequest request, 
-    		HttpServletResponse response, TemplateEngine templateEngine) {
-		ensureSecureProtocol();
-		log.info("messageList for " + user);
+    @RequestMapping(path="/messageList", method=RequestMethod.GET)
+    public void processMessages(@AuthenticationPrincipal User user, Model model, HttpServletRequest request,
+                                HttpServletResponse response) {
+        ensureSecureProtocol();
+        log.info("messageList for " + user);
 
-		try {
-	        List<DecryptedMessage> allMsgs = userManagement.getMessagesForUser(user);
-	
-	        WebContext ctx = new WebContext(request, response, request.getServletContext());
-	        ctx.setVariable("messages", allMsgs);
-	        ctx.setVariable("userid", user.getId());
-	        ctx.setVariable("username", user.getRealName());
+        try {
+            List<DecryptedMessage> allMsgs = userManagement.getMessagesForUser(user);
+            //model.addAttribute("messages", allMsgs);
 
-            templateEngine.process("/message_list.html", ctx, response.getWriter());
+            WebContext ctx = new WebContext(request, response, request.getServletContext());
+            ctx.setVariable("messages", allMsgs);
+            ctx.setVariable("userid", user.getId());
+            ctx.setVariable("username", user.getRealName());
+            //TODO This line is throwing an Exception because the tempate resolver cannot find message_list.html
+            //TODO there may be a problem with either the security in WebSecurityConfig.java or something is wrong with the paths in Config.java or the structure of the project
+            templateEngine.process("message_list", ctx, response.getWriter());
 
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
+
+//    @GetMapping("/messageList")
+//    public String messageList() {
+//	    //TODO this way may be a work around for the exception of the template resolver ... the html page can be put together as a String and then returned
+//        return "<h1>Test</h1>";
+//    }
 	
 	@RequestMapping(path="/sendMessage", method=RequestMethod.POST)
 	public void sendMessage(@AuthenticationPrincipal User user, String recipientId, String message) throws Exception {
