@@ -40,6 +40,9 @@ public class MainController {
 		try {
 			if (!password.equals(password2))
 				throw new Exception("Passwords don't match");
+			checkPassword(password);
+			checkUsername(userId);
+			realName = sanitizeRealName(realName);
 			userManagement.createUser(userId, password, realName);
 			httpServletResponse.setHeader("Location", "/login.html");
 			httpServletResponse.sendRedirect("/login.html");
@@ -50,6 +53,19 @@ public class MainController {
 		}
 	}
 	
+	private String sanitizeRealName(String realName) {
+		// TODO enforce max length, remove illegal characters
+		return realName;
+	}
+
+	private void checkUsername(String userId) {
+		// TODO enforce length and characters constraints
+	}
+
+	private void checkPassword(String password) {
+		// TODO enforce strength requirements
+	}
+
 	@RequestMapping(path="/getMessages", method=RequestMethod.GET)
 	public void getMessages(@AuthenticationPrincipal User user) {
 		ensureSecureProtocol();
@@ -72,13 +88,21 @@ public class MainController {
     }
 	
 	@RequestMapping(path="/sendMessage", method=RequestMethod.POST)
-	public void sendMessage(@AuthenticationPrincipal User user, String recipientId, String message) {
+	public void sendMessage(@AuthenticationPrincipal User user, String recipientId, String message) throws Exception {
 		ensureSecureProtocol();
+		if (!userManagement.userExists(recipientId))
+			throw new Exception("Recipient not found");
+		message = sanitizeMessage(message);
 		log.info("Sending message from " + user + " to " + recipientId);
 	}
 	
+	private String sanitizeMessage(String message) {
+		// TODO enforce max length and illegal characters
+		return message;
+	}
+
 	private void ensureSecureProtocol() {
-		// TODO implement me
+		// TODO throw an exception or do redirect to https if used over plain http
 	}
 	
 	private String handleError(Exception e) {

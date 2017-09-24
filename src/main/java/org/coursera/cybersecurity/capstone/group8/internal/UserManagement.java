@@ -63,4 +63,8 @@ public class UserManagement implements UserDetailsService {
 			throw new UsernameNotFoundException(username);
 		return userDetails;
 	}
+
+	public boolean userExists(String userId) {
+		return userRepository.findOne(userId) != null;
+	}
 }
