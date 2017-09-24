@@ -42,6 +42,8 @@ public class MainController {
 				throw new Exception("Passwords don't match");
 			checkPassword(password);
 			checkUsername(userId);
+			if (realName == null || realName.trim().length() == 0)
+				realName = userId;
 			realName = sanitizeRealName(realName);
 			userManagement.createUser(userId, password, realName);
 			httpServletResponse.setHeader("Location", "/login.html");
@@ -66,19 +68,19 @@ public class MainController {
 		// TODO enforce strength requirements
 	}
 
-	@RequestMapping(path="/getMessages", method=RequestMethod.GET)
-	public void getMessages(@AuthenticationPrincipal User user) {
-		ensureSecureProtocol();
-	}
-
+	@RequestMapping(path="/messageList", method=RequestMethod.GET)
     //TODO method to load messages into the template to display them to the user -- still need some work
-    public void processMessages( HttpServletRequest request, HttpServletResponse response,
-                                 ServletContext servletContext, TemplateEngine templateEngine) {
+    public void processMessages(@AuthenticationPrincipal User user, HttpServletRequest request, 
+    		HttpServletResponse response, TemplateEngine templateEngine) {
+		ensureSecureProtocol();
+		log.info("messageList for " + user);
 
-        List<Message> allMsgs = userManagement.getMessagesForUserID("");
+        List<Message> allMsgs = userManagement.getMessagesForUser(user);
 
-        WebContext ctx = new WebContext(request, response, servletContext);
+        WebContext ctx = new WebContext(request, response, request.getServletContext());
         ctx.setVariable("messages", allMsgs);
+        ctx.setVariable("userid", user.getId());
+        ctx.setVariable("username", user.getRealName());
 
         try {
             templateEngine.process("/message_list.html", ctx, response.getWriter());

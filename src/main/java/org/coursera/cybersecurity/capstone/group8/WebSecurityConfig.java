@@ -33,7 +33,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .loginProcessingUrl("/webapi/login")
                 .usernameParameter("username")
                 .passwordParameter("password")
-                .defaultSuccessUrl("/message_list.html")
+                .defaultSuccessUrl("/webapi/messageList")
                 .permitAll()
                 .and()
             .logout()

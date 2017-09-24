@@ -50,9 +50,10 @@ public class UserManagement implements UserDetailsService {
 		return user;
 	}
 
-	public List<Message> getMessagesForUserID(String id){
-	    return msgRepository.findByToUserIdOrderByTimestampAsc(id);
-    }
+	public List<Message> getMessagesForUser(User user) {
+		List<Message> encryptedMessages = msgRepository.findByToUserIdOrderByTimestampAsc(user.getId());
+		return encryptedMessages;
+	}
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
