@@ -43,10 +43,9 @@ public class UserManagement implements UserDetailsService {
 	public User createUser(String userId, String password, String realName) throws Exception {
 		if (userRepository.findOne(userId) != null)
 			throw new Exception("User exists");
-		byte[] saltBytes = cryptoEngine.getRandomSalt();
 		String saltedPasswordHash = passwordEncoder.encode(password);
 		log.info("Salted password hash is " + saltedPasswordHash);
-		User user = new User(userId, saltedPasswordHash, realName, saltBytes);
+		User user = new User(userId, saltedPasswordHash, realName);
 		userRepository.save(user);
 		log.info("User created: " + user);
 		return user;

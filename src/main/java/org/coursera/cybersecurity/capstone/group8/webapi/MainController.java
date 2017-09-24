@@ -3,7 +3,6 @@ package org.coursera.cybersecurity.capstone.group8.webapi;
 
 import org.coursera.cybersecurity.capstone.group8.internal.UserManagement;
 import org.coursera.cybersecurity.capstone.group8.internal.data.DecryptedMessage;
-import org.coursera.cybersecurity.capstone.group8.internal.data.Message;
 import org.coursera.cybersecurity.capstone.group8.internal.data.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
 import java.util.List;
 
 @RestController
@@ -29,8 +27,6 @@ public class MainController {
 
 	@Autowired
 	private UserManagement userManagement;
-
-
 
 	@ResponseBody
 	@RequestMapping(path="/register", method=RequestMethod.POST)

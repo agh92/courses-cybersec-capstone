@@ -19,17 +19,15 @@ public class User implements UserDetails {
 	
 	private String saltedPasswordHash;
 	private String realName;
-	private byte[] salt;
 	
 	public User() {
 		
 	}
 
-	public User(String userId, String saltedPasswordHash, String realName, byte[] salt) {
+	public User(String userId, String saltedPasswordHash, String realName) {
 		this.id = userId;
 		this.saltedPasswordHash = saltedPasswordHash;
 		this.realName = realName;
-		this.salt = salt;
 	}
 
 	public String getId() {
@@ -54,14 +52,6 @@ public class User implements UserDetails {
 	
 	public void setRealName(String realName) {
 		this.realName = realName;
-	}
-	
-	public byte[] getSalt() {
-		return salt;
-	}
-
-	public void setSalt(byte[] salt) {
-		this.salt = salt;
 	}
 
 	@Override

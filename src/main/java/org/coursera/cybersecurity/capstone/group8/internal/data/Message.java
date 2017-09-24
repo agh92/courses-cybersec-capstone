@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import org.coursera.cybersecurity.capstone.group8.internal.CryptoEngine;
 
@@ -16,6 +17,7 @@ import org.coursera.cybersecurity.capstone.group8.internal.CryptoEngine;
  * @see CryptoEngine
  */
 @Entity
+@Table(name="messages")
 public class Message {
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
