@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"/>
     <title>Message List</title>
 </head>
 <body>
@@ -21,10 +21,10 @@ You are authenticated as ${userid} ${username}
 <hr/>
 
 <form action="/webapi/sendMessage" method="post">
-    To: <input type="text" name="recipientId" value=""/><br>
-    Message:<br>
-    <textarea name="message"></textarea><br>
-    <input type="submit" value="send">
+    To: <input type="text" name="recipientId" value=""/><br/>
+    Message:<br/>
+    <textarea name="message"></textarea><br/>
+    <input type="submit" value="send"/>
 </form>
 
 <hr/>
