@@ -99,22 +99,29 @@ public class MainController {
 	}
 
     @RequestMapping(path="/messageList", method=RequestMethod.GET)
-    public String processMessages(@AuthenticationPrincipal User user, Model model, HttpServletRequest request,
+    public String processMessages(@AuthenticationPrincipal User user, HttpServletRequest request,
                                 HttpServletResponse response) {
         ensureSecureProtocol();
         log.info("messageList for " + user.getId() + " - " + user.getRealName());
 
         try {
             List<DecryptedMessage> allMsgs = userManagement.getMessagesForUser(user);
-            //model.addAttribute("messages", allMsgs);
+            //DUmmy data to test the table
+            DecryptedMessage msg = new DecryptedMessage();
+            msg.setFromUserId("12345");
+            msg.setId(3443341212l);
+            msg.setPlainTextMessage("Test adfg sdfg sdf gsdf h dfgj sg er var g srdg dr gst gv srv st vs v srv ae fa sdfasdfsdg ds hdf hsd fg");
+            msg.setTimestamp(1234234232133l);
+            msg.setToUserId("123");
+            allMsgs.add(msg);
 
             WebContext ctx = new WebContext(request, response, request.getServletContext());
             ctx.setVariable("messages", allMsgs);
             ctx.setVariable("userid", user.getId());
             ctx.setVariable("username", user.getRealName());
 
-            //templateEngine.process("message_list", ctx, response.getWriter());
-			return templateEngine.process("message_list", ctx);
+            return templateEngine.process("message_list", ctx);
+
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

@@ -3,29 +3,86 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Message List</title>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+
+        input[type=text], select {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type=submit] {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type=submit]:hover {
+            background-color: #45a049;
+        }
+
+        div {
+            border-radius: 5px;
+            background-color: #f2f2f2;
+            padding: 20px;
+        }
+
+        textarea {
+            width: 100%;
+        }
+
+    </style>
 </head>
 <body>
-You are authenticated as ${userid} ${username}
+<h1> Hello <span th:utext="${username}"></span> !</h1>
 <hr/>
 <table style="border: solid">
     <tr>
-        <th>User</th>
-        <th>Time stamp</th>
+        <th>From</th>
+        <th>Date</th>
+        <th>Message</th>
     </tr>
     <tr th:each="message : ${messages}">
-        <td th:text="${message.toUserId}">Bob</td>
-        <td th:text="${message.timestamp}">1234135234</td>
+        <td th:text="${message.toUserId}"></td>
+        <td th:text="${#dates.format(new java.util.Date(message.timestamp))}"></td>
+        <td th:text="${message.plainTextMessage}"></td>
     </tr>
 </table>
 
 <hr/>
-
+<div>
 <form action="/webapi/sendMessage" method="post">
-    To: <input type="text" name="recipientId" value=""/><br/>
-    Message:<br/>
-    <textarea name="message"></textarea><br/>
+    <label for="recipientId">To</label>
+    <input type="text" id="recipientId" name="recipientId" value="" placeholder="Your friend´s id.."/><br/>
+    <label for="message">Message</label><br/>
+    <textarea id="message" name="message"></textarea><br/>
     <input type="submit" value="send"/>
 </form>
+</div>
 
 <hr/>
 
