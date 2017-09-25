@@ -1,18 +1,93 @@
 <html>
 <head>
 <title>Registration</title>
+    <style>
+        input[type=text], select {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type=password], select {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type=submit] {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type=submit]:hover {
+            background-color: #45a049;
+        }
+
+        div {
+            border-radius: 5px;
+            background-color: #f2f2f2;
+            padding: 20px;
+        }
+
+        ul.nav {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+        }
+
+        li.nav {
+            float: left;
+        }
+
+        li a.nav {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        li a.nav:hover {
+            background-color: #45a049;
+        }
+
+    </style>
 </head>
 <body>
-<a href="./index.html">Homepage</a><br/>
+<ul class="nav">
+    <li class="nav"><a class="nav" href="./index.html">Home</a></li>
+</ul><br/>
 
 <form action="/webapi/register" method="post">
-User ID: <input type="text" name="userId" value=""/><br/>
-Password: <input type="password" name="password" value=""/><br/>
-Repeat password: <input type="password" name="password2" value=""/><br/>
-Real name: <input type="text" name="realName" value=""/><br/>
-Secret question: <input type="text" name="secretQuestion" value=""/><br/>
-Secret answer: <input type="text" name="secretAnswer" value=""/><br/>
-<input type="submit"/><br/>
+    <label for="userId">User ID</label>
+    <input type="text" id="userId" name="userId" value=""/><br/>
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" value=""/><br/>
+    <label for="password2">Repeat password</label>
+    <input type="password" id="password2" name="password2" value=""/><br/>
+    <label for="realName">Real name</label>
+    <input type="text" id="realName" name="realName" value=""/><br/>
+    <label for="secretQuestion">Secret question</label>
+    <input type="text" id="secretQuestion" name="secretQuestion" value=""/><br/>
+    <label for="secretAnswer">Secret answer</label>
+    <input type="text" id="secretAnswer" name="secretAnswer" value=""/><br/>
+    <input type="submit"/><br/>
 </form>
 </body>
 </html>
