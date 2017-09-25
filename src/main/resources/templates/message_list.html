@@ -60,6 +60,7 @@
 <body>
 <h1> Hello <span th:utext="${username}"></span> !</h1>
 <hr/>
+<a href="/webapi/messageList">Check new messages</a><br/>
 <table style="border: solid">
     <tr>
         <th>From</th>
@@ -67,7 +68,7 @@
         <th>Message</th>
     </tr>
     <tr th:each="message : ${messages}">
-        <td th:text="${message.toUserId}"></td>
+        <td th:text="${message.fromUserId}"></td>
         <td th:text="${#dates.format(new java.util.Date(message.timestamp))}"></td>
         <td th:text="${message.plainTextMessage}"></td>
     </tr>

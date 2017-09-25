@@ -79,4 +79,9 @@ public class UserManagement implements UserDetailsService {
 	public void persist(User user) {
 		userRepository.save(user);
 	}
+
+	public void saveMessage(DecryptedMessage decryptedMessage) throws Exception {
+		Message encryptedMessage = cryptoEngine.encryptMessage(decryptedMessage);
+		msgRepository.save(encryptedMessage);
+	}
 }

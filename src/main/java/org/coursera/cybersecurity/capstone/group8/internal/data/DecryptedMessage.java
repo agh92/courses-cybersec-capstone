@@ -25,6 +25,13 @@ public class DecryptedMessage {
 		this.plainTextMessage = plainText;
 	}
 
+	public DecryptedMessage(User user, String recipientId, String message) {
+		this.fromUserId = user.getId();
+		this.toUserId = recipientId;
+		this.timestamp = System.currentTimeMillis();
+		this.plainTextMessage = message;
+	}
+
 	public long getId() {
 		return id;
 	}

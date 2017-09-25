@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
@@ -129,12 +128,17 @@ public class MainController {
     }
 	
 	@RequestMapping(path="/sendMessage", method=RequestMethod.POST)
-	public void sendMessage(@AuthenticationPrincipal User user, String recipientId, String message) throws Exception {
+	public void sendMessage(@AuthenticationPrincipal User user, String recipientId, String message, 
+			HttpServletResponse httpServletResponse) throws Exception {
 		ensureSecureProtocol();
 		if (!userManagement.userExists(recipientId))
 			throw new Exception("Recipient not found");
 		message = sanitizeMessage(message);
 		log.info("Sending message from " + user + " to " + recipientId);
+		DecryptedMessage decryptedMessage = new DecryptedMessage(user, recipientId, message);
+		userManagement.saveMessage(decryptedMessage);
+		httpServletResponse.setHeader("Location", "/webapi/messageList");
+		httpServletResponse.sendRedirect("/webapi/messageList");
 	}
 	
 	private String sanitizeMessage(String message) {

@@ -3,7 +3,6 @@ package org.coursera.cybersecurity.capstone.group8;
 import org.coursera.cybersecurity.capstone.group8.internal.CryptoEngine;
 import org.coursera.cybersecurity.capstone.group8.internal.UserManagement;
 import org.coursera.cybersecurity.capstone.group8.internal.data.DbTools;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Description;
@@ -11,7 +10,6 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.spring4.view.ThymeleafViewResolver;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
-import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
 @Configuration
 public class Config {
