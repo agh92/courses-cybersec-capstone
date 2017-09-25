@@ -40,13 +40,13 @@ public class UserManagement implements UserDetailsService {
 	@Autowired
     private MessageRepository msgRepository;
 
-	public User createUser(String userId, String password, String realName, 
+	public User createUser(String userId, String password, 
 			String secretQuestion, String secretAnswer) throws Exception {
 		if (userRepository.findOne(userId) != null)
 			throw new Exception("User exists");
 		String saltedPasswordHash = passwordEncoder.encode(password);
 		String secretHashedAnswer = passwordEncoder.encode(secretAnswer);
-		User user = new User(userId, saltedPasswordHash, realName, secretQuestion, secretHashedAnswer);
+		User user = new User(userId, saltedPasswordHash, secretQuestion, secretHashedAnswer);
 		userRepository.save(user);
 		log.info("User created: " + user);
 		return user;

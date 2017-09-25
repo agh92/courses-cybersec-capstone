@@ -1,6 +1,7 @@
 package org.coursera.cybersecurity.capstone.group8;
 
 import org.coursera.cybersecurity.capstone.group8.internal.CryptoEngine;
+import org.coursera.cybersecurity.capstone.group8.internal.InputSanitizer;
 import org.coursera.cybersecurity.capstone.group8.internal.UserManagement;
 import org.coursera.cybersecurity.capstone.group8.internal.data.MessageRepository;
 import org.coursera.cybersecurity.capstone.group8.internal.data.UserRepository;
@@ -35,4 +36,9 @@ public class TestConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+	
+	@Bean
+	public InputSanitizer getInputSanitizer() {
+		return new InputSanitizer();
+	}
 }

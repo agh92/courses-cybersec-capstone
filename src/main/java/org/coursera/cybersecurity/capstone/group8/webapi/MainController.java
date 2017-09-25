@@ -1,6 +1,7 @@
 package org.coursera.cybersecurity.capstone.group8.webapi;
 
 
+import org.coursera.cybersecurity.capstone.group8.internal.InputSanitizer;
 import org.coursera.cybersecurity.capstone.group8.internal.UserManagement;
 import org.coursera.cybersecurity.capstone.group8.internal.data.DecryptedMessage;
 import org.coursera.cybersecurity.capstone.group8.internal.data.User;
@@ -31,10 +32,13 @@ public class MainController {
 
 	@Autowired
     private TemplateEngine templateEngine;
+	
+	@Autowired
+	private InputSanitizer inputSanitizer;
 
 	@ResponseBody
 	@RequestMapping(path="/register", method=RequestMethod.POST)
-	public String register(String userId, String password, String password2, String realName, 
+	public String register(String userId, String password, String password2, 
 			String secretQuestion, String secretAnswer, 
 			HttpServletResponse httpServletResponse) {
 		ensureSecureProtocol();
@@ -42,13 +46,10 @@ public class MainController {
 		try {
 			if (!password.equals(password2))
 				throw new Exception("Passwords don't match");
-			checkPassword(password);
-			checkUsername(userId);
-			checkSecretAnswer(secretAnswer);
-			if (realName == null || realName.trim().length() == 0)
-				realName = userId;
-			realName = sanitizeRealName(realName);
-			userManagement.createUser(userId, password, realName, secretQuestion, secretAnswer);
+			inputSanitizer.checkPassword(password);
+			inputSanitizer.checkUsername(userId);
+			inputSanitizer.checkSecretAnswer(secretAnswer);
+			userManagement.createUser(userId, password, secretQuestion, secretAnswer);
 			httpServletResponse.setHeader("Location", "/login.html");
 			httpServletResponse.sendRedirect("/login.html");
 			return "ok";
@@ -58,17 +59,13 @@ public class MainController {
 		}
 	}
 
-	private void checkSecretAnswer(String secretAnswer) {
-		// TODO ensure secret answer constraints
-	}
-
 	@ResponseBody
 	@RequestMapping(path="/passwordReset", method=RequestMethod.POST)
 	public String passwordReset(String username, String password, String password2, 
 			String secretAnswer, HttpServletResponse httpServletResponse) {
 		try {
-			checkPassword(password);
-			checkUsername(username);
+			inputSanitizer.checkPassword(password);
+			inputSanitizer.checkUsername(username);
 			User user = (User) userManagement.loadUserByUsername(username);
 			if (!passwordEncoder.matches(secretAnswer, user.getSecretHashedAnswer())) 
 				throw new Exception("Secret answer doesn't match");
@@ -83,25 +80,12 @@ public class MainController {
 			return handleError(e);
 		}
 	}
-	
-	private String sanitizeRealName(String realName) {
-		// TODO enforce max length, remove illegal characters
-		return realName;
-	}
-
-	private void checkUsername(String userId) {
-		// TODO enforce length and characters constraints
-	}
-
-	private void checkPassword(String password) {
-		// TODO enforce strength requirements
-	}
 
     @RequestMapping(path="/messageList", method=RequestMethod.GET)
     public String processMessages(@AuthenticationPrincipal User user, HttpServletRequest request,
                                 HttpServletResponse response) {
         ensureSecureProtocol();
-        log.info("messageList for " + user.getId() + " - " + user.getRealName());
+        log.info("messageList for " + user.getId());
 
         try {
             List<DecryptedMessage> allMsgs = userManagement.getMessagesForUser(user);
@@ -117,7 +101,6 @@ public class MainController {
             WebContext ctx = new WebContext(request, response, request.getServletContext());
             ctx.setVariable("messages", allMsgs);
             ctx.setVariable("userid", user.getId());
-            ctx.setVariable("username", user.getRealName());
 
             return templateEngine.process("message_list", ctx);
 
@@ -133,17 +116,12 @@ public class MainController {
 		ensureSecureProtocol();
 		if (!userManagement.userExists(recipientId))
 			throw new Exception("Recipient not found");
-		message = sanitizeMessage(message);
+		message = inputSanitizer.sanitizeMessage(message);
 		log.info("Sending message from " + user + " to " + recipientId);
 		DecryptedMessage decryptedMessage = new DecryptedMessage(user, recipientId, message);
 		userManagement.saveMessage(decryptedMessage);
 		httpServletResponse.setHeader("Location", "/webapi/messageList");
 		httpServletResponse.sendRedirect("/webapi/messageList");
-	}
-	
-	private String sanitizeMessage(String message) {
-		// TODO enforce max length and illegal characters
-		return message;
 	}
 
 	private void ensureSecureProtocol() {

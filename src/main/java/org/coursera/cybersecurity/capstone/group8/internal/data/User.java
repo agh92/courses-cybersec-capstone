@@ -18,7 +18,6 @@ public class User implements UserDetails {
 	private String id;
 	
 	private String saltedPasswordHash;
-	private String realName;
 	private String secretQuestion;
 	private String secretHashedAnswer;
 	
@@ -26,11 +25,10 @@ public class User implements UserDetails {
 		
 	}
 
-	public User(String userId, String saltedPasswordHash, String realName, 
+	public User(String userId, String saltedPasswordHash, 
 			String secretQuestion, String secretHashedAnswer) {
 		this.id = userId;
 		this.saltedPasswordHash = saltedPasswordHash;
-		this.realName = realName;
 		this.secretQuestion = secretQuestion;
 		this.secretHashedAnswer = secretHashedAnswer;
 	}
@@ -49,14 +47,6 @@ public class User implements UserDetails {
 	
 	public void setSaltedPasswordHash(String saltedPasswordHash) {
 		this.saltedPasswordHash = saltedPasswordHash;
-	}
-	
-	public String getRealName() {
-		return realName;
-	}
-	
-	public void setRealName(String realName) {
-		this.realName = realName;
 	}
 
 	@Override

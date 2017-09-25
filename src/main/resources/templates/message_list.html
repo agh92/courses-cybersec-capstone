@@ -58,7 +58,7 @@
     </style>
 </head>
 <body>
-<h1> Hello <span th:utext="${username}"></span> !</h1>
+<h1> Hello <span th:utext="${userid}"></span> !</h1>
 <hr/>
 <a href="/webapi/messageList">Check new messages</a><br/>
 <table style="border: solid">
@@ -79,6 +79,7 @@
 <form action="/webapi/sendMessage" method="post">
     <label for="recipientId">To</label>
     <input type="text" id="recipientId" name="recipientId" value="" placeholder="Your friend´s id.."/><br/>
+    Maximum length 255 characters, no HTML allowed.
     <label for="message">Message</label><br/>
     <textarea id="message" name="message"></textarea><br/>
     <input type="submit" value="send"/>
