@@ -2,6 +2,7 @@ package org.coursera.cybersecurity.capstone.group8.webapi;
 
 
 import org.coursera.cybersecurity.capstone.group8.internal.InputSanitizer;
+import org.coursera.cybersecurity.capstone.group8.internal.UserInputException;
 import org.coursera.cybersecurity.capstone.group8.internal.UserManagement;
 import org.coursera.cybersecurity.capstone.group8.internal.data.DecryptedMessage;
 import org.coursera.cybersecurity.capstone.group8.internal.data.User;
@@ -16,6 +17,7 @@ import org.thymeleaf.context.WebContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -36,12 +38,11 @@ public class MainController {
 	@RequestMapping(path="/register", method=RequestMethod.POST)
 	public String register(String userId, String password, String password2, 
 			String secretQuestion, String secretAnswer, 
-			HttpServletResponse httpServletResponse) {
-		ensureSecureProtocol();
+			HttpServletRequest request, HttpServletResponse httpServletResponse) {
 		log.info("Creating user " + userId);
 		try {
 			if (!password.equals(password2))
-				throw new Exception("Passwords don't match");
+				throw new UserInputException("Passwords don't match");
 			inputSanitizer.checkPassword(password);
 			inputSanitizer.checkUsername(userId);
 			inputSanitizer.checkSecretAnswer(secretAnswer);
@@ -49,16 +50,19 @@ public class MainController {
 			httpServletResponse.setHeader("Location", "/login.html");
 			httpServletResponse.sendRedirect("/login.html");
 			return "ok";
+		} catch (UserInputException e) {
+			log.error(e.getMessage());
+			return handleError(request, httpServletResponse, e);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return handleError(e);
+			return handleError(request, httpServletResponse, e);
 		}
 	}
 
 	@ResponseBody
 	@RequestMapping(path="/passwordReset", method=RequestMethod.POST)
 	public String passwordReset(String username, String password, String password2, 
-			String secretAnswer, HttpServletResponse httpServletResponse) {
+			String secretAnswer, HttpServletRequest request, HttpServletResponse httpServletResponse) {
 		try {
 			inputSanitizer.checkUsername(username);
 			User user = (User) userManagement.loadUserByUsername(username);
@@ -70,28 +74,22 @@ public class MainController {
 			userManagement.persist(user);
 			log.info("Password reset successful for " + user);
 			return "ok";
+		} catch (UserInputException e) {
+			log.error(e.getMessage());
+			return handleError(request, httpServletResponse, e);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return handleError(e);
+			return handleError(request, httpServletResponse, e);
 		}
 	}
 
     @RequestMapping(path="/messageList", method=RequestMethod.GET)
     public String processMessages(@AuthenticationPrincipal User user, HttpServletRequest request,
                                 HttpServletResponse response) {
-        ensureSecureProtocol();
         log.info("messageList for " + user.getId());
 
         try {
             List<DecryptedMessage> allMsgs = userManagement.getMessagesForUser(user);
-            //DUmmy data to test the table
-            DecryptedMessage msg = new DecryptedMessage();
-            msg.setFromUserId("12345");
-            msg.setId(3443341212l);
-            msg.setPlainTextMessage("Test adfg sdfg sdf gsdf h dfgj sg er var g srdg dr gst gv srv st vs v srv ae fa sdfasdfsdg ds hdf hsd fg");
-            msg.setTimestamp(1234234232133l);
-            msg.setToUserId("123");
-            allMsgs.add(msg);
 
             WebContext ctx = new WebContext(request, response, request.getServletContext());
             ctx.setVariable("messages", allMsgs);
@@ -100,35 +98,55 @@ public class MainController {
             return templateEngine.process("message_list", ctx);
 
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+			log.error(e.getMessage());
+			return handleError(request, response, e);
         }
-        return null;
     }
 	
 	@RequestMapping(path="/sendMessage", method=RequestMethod.POST)
 	public void sendMessage(@AuthenticationPrincipal User user, String recipientId, String message, 
-			HttpServletResponse httpServletResponse) throws Exception {
-		ensureSecureProtocol();
-		if (!userManagement.userExists(recipientId))
-			throw new Exception("Recipient not found");
-		message = inputSanitizer.sanitizeMessage(message);
-		log.info("Sending message from " + user + " to " + recipientId);
-		DecryptedMessage decryptedMessage = new DecryptedMessage(user, recipientId, message);
-		userManagement.saveMessage(decryptedMessage);
-		httpServletResponse.setHeader("Location", "/webapi/messageList");
-		httpServletResponse.sendRedirect("/webapi/messageList");
-	}
-
-	private void ensureSecureProtocol() {
-		// TODO throw an exception or do redirect to https if used over plain http
+			HttpServletRequest request, HttpServletResponse httpServletResponse) throws Exception {
+		try {
+			if (!userManagement.userExists(recipientId))
+				throw new UserInputException("Recipient not found");
+			message = inputSanitizer.sanitizeMessage(message);
+			log.info("Sending message from " + user + " to " + recipientId);
+			DecryptedMessage decryptedMessage = new DecryptedMessage(user, recipientId, message);
+			userManagement.saveMessage(decryptedMessage);
+			httpServletResponse.setHeader("Location", "/webapi/messageList");
+			httpServletResponse.sendRedirect("/webapi/messageList");
+		} catch (UserInputException e) {
+			log.error(e.getMessage());
+			handleErrorNoReturn(request, httpServletResponse, e);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			// We don't want to reveal the underlying exception
+			handleErrorNoReturn(request, httpServletResponse, "Could not send message");
+		}
 	}
 	
-	private String handleError(Exception e) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("<html><head><title>Error</title></head><body>");
-		sb.append("An error has happened: ").append(e.getMessage()).append("<br/>");
-		sb.append("You can <a href=\"#\" onClick=\"history.back()\">return back</a> or go to the <a href=\"/index.html\">homepage</a>.");
-		sb.append("</body></html>");
-		return sb.toString();
+	private void handleErrorNoReturn(HttpServletRequest request, HttpServletResponse httpServletResponse, 
+			Exception e) throws IOException {
+		handleError(request, httpServletResponse, e.getMessage());
+	}
+	
+	private void handleErrorNoReturn(HttpServletRequest request, HttpServletResponse httpServletResponse, 
+			String errorMsg) throws IOException {
+		String s = handleError(request, httpServletResponse, errorMsg);
+		httpServletResponse.getWriter().write(s);
+	}
+	
+	private String handleError(HttpServletRequest request, HttpServletResponse httpServletResponse, 
+			Exception e) {
+		return handleError(request, httpServletResponse, e.getMessage());
+	}
+	
+	private String handleError(HttpServletRequest request, HttpServletResponse httpServletResponse, 
+			String errorMsg) {
+		httpServletResponse.reset();
+        WebContext ctx = new WebContext(request, httpServletResponse, request.getServletContext());
+        ctx.setVariable("errormsg", errorMsg);
+
+        return templateEngine.process("error", ctx);
 	}
 }

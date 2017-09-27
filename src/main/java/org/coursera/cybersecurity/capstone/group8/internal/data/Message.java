@@ -1,5 +1,6 @@
 package org.coursera.cybersecurity.capstone.group8.internal.data;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -26,6 +27,8 @@ public class Message {
 	private String fromUserId;
 	private String toUserId;
 	private long timestamp;
+	// There's no default length for underlying type 
+	@Column(name="encrypted_message", length=1024) 
 	private byte[] encryptedMessage;
 	
 	public Message() {

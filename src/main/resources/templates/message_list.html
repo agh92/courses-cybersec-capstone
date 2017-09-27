@@ -1,61 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
+	<link rel="stylesheet" type="text/css" href="/css/style.css" media="screen" />
     <meta charset="UTF-8"/>
     <title>Message List</title>
-    <style>
-        table {
-            font-family: arial, sans-serif;
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        td, th {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-
-        tr:nth-child(even) {
-            background-color: #dddddd;
-        }
-
-        input[type=text], select {
-            width: 100%;
-            padding: 12px 20px;
-            margin: 8px 0;
-            display: inline-block;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        input[type=submit] {
-            width: 100%;
-            background-color: #4CAF50;
-            color: white;
-            padding: 14px 20px;
-            margin: 8px 0;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        input[type=submit]:hover {
-            background-color: #45a049;
-        }
-
-        div {
-            border-radius: 5px;
-            background-color: #f2f2f2;
-            padding: 20px;
-        }
-
-        textarea {
-            width: 100%;
-        }
-
-    </style>
 </head>
 <body>
 <h1> Hello <span th:utext="${userid}"></span> !</h1>
@@ -78,10 +26,9 @@
 <div>
 <form action="/webapi/sendMessage" method="post">
     <label for="recipientId">To</label>
-    <input type="text" id="recipientId" name="recipientId" value="" placeholder="Your friend´s id.."/><br/>
-    Maximum length 255 characters, no HTML allowed.
-    <label for="message">Message</label><br/>
-    <textarea id="message" name="message"></textarea><br/>
+    <input type="text" id="recipientId" name="recipientId" value="" placeholder="Your friend´s id, must be an existing user"/><br/>
+    <label for="message">Your message</label><br/>
+    <textarea id="message" name="message" placeholder="Maximum length 255 characters, no HTML allowed"></textarea><br/>
     <input type="submit" value="send"/>
 </form>
 </div>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<link rel="stylesheet" type="text/css" href="/css/style.css" media="screen" />
+    <meta charset="UTF-8"/>
+    <title>Error</title>
+</head>
+<body>
+
+An error has happened: <span th:utext="${errormsg}"></span><br/>
+You can <a href="#" onClick="history.back()">return back</a> or go to the <a href="/index.html\">homepage</a>.
+		
+</body>
+</html>
