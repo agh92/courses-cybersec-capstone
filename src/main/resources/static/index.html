@@ -1,33 +1,7 @@
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="/css/style.css" media="screen" />
 <title>Homepage</title>
-
-    <style>
-        ul.nav {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #333;
-        }
-
-        li.nav {
-            float: left;
-        }
-
-        li a.nav {
-            display: block;
-            color: white;
-            text-align: center;
-            padding: 14px 16px;
-            text-decoration: none;
-        }
-
-        li a.nav:hover {
-            background-color: #45a049;
-        }
-
-    </style>
 
 </head>
 <body>
@@ -48,7 +22,6 @@
 
 <h1>Threat model</h1>
 
-<p>Our assumptions are:
 <ul>
 <li>Adversary can see all unencrypted network traffic of legitimate users</li>
 <li>Adversary can see the database dump</li>
@@ -56,7 +29,6 @@
 <li>Adversary cannot see the memory used by our process</li>
 <li>Leaking metadata (e.g. the fact that user A sent a message to user B) is not a problem, as long as the content of the message is secure</li>
 </ul>
-</p>
 
 <h1>Design considerations</h1>
 
@@ -64,7 +36,10 @@
 <li>All communications secured by https protocol, to prevent sniffing users' credentials 
 and session hijacking.</li>
 <li>Passwords in database are hashed using <a href="https://en.wikipedia.org/wiki/Bcrypt" target="_blank" title="Opens in new window">bcrypt</a>.</li>
+<li>Message field in the database is encrypted with AES/CBC/PKCS5Padding.</li>
 </ul>
+
+<h1>Good luck breaking it!</h1>
 
 </body>
 </html>

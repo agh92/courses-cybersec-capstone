@@ -60,10 +60,10 @@ public class MainController {
 	public String passwordReset(String username, String password, String password2, 
 			String secretAnswer, HttpServletResponse httpServletResponse) {
 		try {
-			inputSanitizer.checkPassword(password);
 			inputSanitizer.checkUsername(username);
 			User user = (User) userManagement.loadUserByUsername(username);
 			userManagement.checkSecretAnswerMatches(user, secretAnswer);
+			inputSanitizer.checkPassword(password);
 			if (!password.equals(password2))
 				throw new Exception("New passwords don't match");
 			userManagement.setNewPassword(user, password);
