@@ -84,4 +84,13 @@ public class UserManagement implements UserDetailsService {
 		Message encryptedMessage = cryptoEngine.encryptMessage(decryptedMessage);
 		msgRepository.save(encryptedMessage);
 	}
+
+	public void checkSecretAnswerMatches(User user, String secretAnswer) throws Exception {
+		if (!passwordEncoder.matches(secretAnswer, user.getSecretHashedAnswer())) 
+			throw new Exception("Secret answer doesn't match");
+	}
+
+	public void setNewPassword(User user, String password) {
+		user.setSaltedPasswordHash(passwordEncoder.encode(password));
+	}
 }

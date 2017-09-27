@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
@@ -26,9 +25,6 @@ public class MainController {
 
 	@Autowired
 	private UserManagement userManagement;
-	
-	@Autowired
-	private PasswordEncoder passwordEncoder;
 
 	@Autowired
     private TemplateEngine templateEngine;
@@ -67,11 +63,10 @@ public class MainController {
 			inputSanitizer.checkPassword(password);
 			inputSanitizer.checkUsername(username);
 			User user = (User) userManagement.loadUserByUsername(username);
-			if (!passwordEncoder.matches(secretAnswer, user.getSecretHashedAnswer())) 
-				throw new Exception("Secret answer doesn't match");
+			userManagement.checkSecretAnswerMatches(user, secretAnswer);
 			if (!password.equals(password2))
 				throw new Exception("New passwords don't match");
-			user.setSaltedPasswordHash(passwordEncoder.encode(password));
+			userManagement.setNewPassword(user, password);
 			userManagement.persist(user);
 			log.info("Password reset successful for " + user);
 			return "ok";
