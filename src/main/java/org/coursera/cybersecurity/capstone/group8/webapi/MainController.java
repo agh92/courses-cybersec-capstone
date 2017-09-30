@@ -53,10 +53,10 @@ public class MainController {
 			return "";
 		} catch (UserInputException e) {
 			log.error(e.getMessage());
-			return handleError(request, httpServletResponse, e);
+			return handleError(null, request, httpServletResponse, e);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return handleError(request, httpServletResponse, e);
+			return handleError(null, request, httpServletResponse, e);
 		}
 	}
 
@@ -72,10 +72,10 @@ public class MainController {
             return templateEngine.process("password_reset2", ctx);
 		} catch (UsernameNotFoundException e) {
 			log.error(e.getMessage());
-			return handleError(request, response, e);
+			return handleError(null, request, response, e);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return handleError(request, response, e);
+			return handleError(null, request, response, e);
 		}
 	}
 
@@ -98,10 +98,10 @@ public class MainController {
 			return "";
 		} catch (UsernameNotFoundException|UserInputException e) {
 			log.error(e.getMessage());
-			return handleError(request, httpServletResponse, e);
+			return handleError(null, request, httpServletResponse, e);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return handleError(request, httpServletResponse, e);
+			return handleError(null, request, httpServletResponse, e);
 		}
 	}
 
@@ -118,7 +118,7 @@ public class MainController {
 
         } catch (Exception e) {
 			log.error(e.getMessage());
-			return handleError(request, response, e);
+			return handleError(null, request, response, e);
         }
     }
 
@@ -139,7 +139,7 @@ public class MainController {
 
         } catch (Exception e) {
 			log.error(e.getMessage());
-			return handleError(request, response, e);
+			return handleError(user, request, response, e);
         }
     }
 	
@@ -159,24 +159,31 @@ public class MainController {
 			return "";
 		} catch (UserInputException e) {
 			log.error(e.getMessage());
-			return handleError(request, httpServletResponse, e);
+			return handleError(user, request, httpServletResponse, e);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			// We don't want to reveal the underlying exception
-			return handleError(request, httpServletResponse, "Could not send message");
+			return handleError(user, request, httpServletResponse, "Could not send message");
 		}
 	}
 	
-	private String handleError(HttpServletRequest request, HttpServletResponse httpServletResponse, 
+	private String handleError(User user, HttpServletRequest request, HttpServletResponse httpServletResponse, 
 			Exception e) {
-		return handleError(request, httpServletResponse, e.getMessage());
+		return handleError(user, request, httpServletResponse, e.getMessage());
 	}
 	
-	private String handleError(HttpServletRequest request, HttpServletResponse httpServletResponse, 
+	private String handleError(User user, HttpServletRequest request, HttpServletResponse httpServletResponse, 
 			String errorMsg) {
 		httpServletResponse.reset();
         WebContext ctx = new WebContext(request, httpServletResponse, request.getServletContext());
         ctx.setVariable("errormsg", errorMsg);
+        if (user != null) {
+	        ctx.setVariable("pagetitle", "message list page");
+	        ctx.setVariable("link", "/webapi/messageList");
+        } else {
+	        ctx.setVariable("pagetitle", "homepage");
+	        ctx.setVariable("link", "/index.html");
+        }
 
         return templateEngine.process("error", ctx);
 	}
