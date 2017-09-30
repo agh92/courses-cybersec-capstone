@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
@@ -38,18 +39,18 @@ public class MainController {
 	@RequestMapping(path="/register", method=RequestMethod.POST)
 	public String register(String userId, String password, String password2, 
 			String secretQuestion, String secretAnswer, 
-			HttpServletRequest request, HttpServletResponse httpServletResponse) {
+			HttpServletRequest request, HttpServletResponse httpServletResponse) throws IOException {
 		log.info("Creating user " + userId);
 		try {
+			inputSanitizer.checkUsername(userId);
 			if (!password.equals(password2))
 				throw new UserInputException("Passwords don't match");
 			inputSanitizer.checkPassword(password);
-			inputSanitizer.checkUsername(userId);
 			inputSanitizer.checkSecretAnswer(secretAnswer);
 			userManagement.createUser(userId, password, secretQuestion, secretAnswer);
 			httpServletResponse.setHeader("Location", "/login.html");
 			httpServletResponse.sendRedirect("/login.html");
-			return "ok";
+			return "";
 		} catch (UserInputException e) {
 			log.error(e.getMessage());
 			return handleError(request, httpServletResponse, e);
@@ -60,9 +61,28 @@ public class MainController {
 	}
 
 	@ResponseBody
+	@RequestMapping(path="/passwordReset2", method=RequestMethod.POST)
+	public String passwordReset2(String username, HttpServletRequest request, 
+			HttpServletResponse response) {
+		try {
+			User user = (User) userManagement.loadUserByUsername(username);
+            WebContext ctx = new WebContext(request, response, request.getServletContext());
+            ctx.setVariable("userid", user.getId());
+            ctx.setVariable("secretquestion", user.getSecretQuestion());
+            return templateEngine.process("password_reset2", ctx);
+		} catch (UsernameNotFoundException e) {
+			log.error(e.getMessage());
+			return handleError(request, response, e);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return handleError(request, response, e);
+		}
+	}
+
+	@ResponseBody
 	@RequestMapping(path="/passwordReset", method=RequestMethod.POST)
 	public String passwordReset(String username, String password, String password2, 
-			String secretAnswer, HttpServletRequest request, HttpServletResponse httpServletResponse) {
+			String secretAnswer, HttpServletRequest request, HttpServletResponse httpServletResponse) throws IOException {
 		try {
 			inputSanitizer.checkUsername(username);
 			User user = (User) userManagement.loadUserByUsername(username);
@@ -73,8 +93,10 @@ public class MainController {
 			userManagement.setNewPassword(user, password);
 			userManagement.persist(user);
 			log.info("Password reset successful for " + user);
-			return "ok";
-		} catch (UserInputException e) {
+			httpServletResponse.setHeader("Location", "/login.html");
+			httpServletResponse.sendRedirect("/login.html");
+			return "";
+		} catch (UsernameNotFoundException|UserInputException e) {
 			log.error(e.getMessage());
 			return handleError(request, httpServletResponse, e);
 		} catch (Exception e) {
@@ -83,6 +105,7 @@ public class MainController {
 		}
 	}
 
+	@ResponseBody
     @RequestMapping(path="/messageList", method=RequestMethod.GET)
     public String processMessages(@AuthenticationPrincipal User user, HttpServletRequest request,
                                 HttpServletResponse response) {
@@ -103,8 +126,9 @@ public class MainController {
         }
     }
 	
+	@ResponseBody
 	@RequestMapping(path="/sendMessage", method=RequestMethod.POST)
-	public void sendMessage(@AuthenticationPrincipal User user, String recipientId, String message, 
+	public String sendMessage(@AuthenticationPrincipal User user, String recipientId, String message, 
 			HttpServletRequest request, HttpServletResponse httpServletResponse) throws Exception {
 		try {
 			if (!userManagement.userExists(recipientId))
@@ -115,25 +139,15 @@ public class MainController {
 			userManagement.saveMessage(decryptedMessage);
 			httpServletResponse.setHeader("Location", "/webapi/messageList");
 			httpServletResponse.sendRedirect("/webapi/messageList");
+			return "";
 		} catch (UserInputException e) {
 			log.error(e.getMessage());
-			handleErrorNoReturn(request, httpServletResponse, e);
+			return handleError(request, httpServletResponse, e);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			// We don't want to reveal the underlying exception
-			handleErrorNoReturn(request, httpServletResponse, "Could not send message");
+			return handleError(request, httpServletResponse, "Could not send message");
 		}
-	}
-	
-	private void handleErrorNoReturn(HttpServletRequest request, HttpServletResponse httpServletResponse, 
-			Exception e) throws IOException {
-		handleError(request, httpServletResponse, e.getMessage());
-	}
-	
-	private void handleErrorNoReturn(HttpServletRequest request, HttpServletResponse httpServletResponse, 
-			String errorMsg) throws IOException {
-		String s = handleError(request, httpServletResponse, errorMsg);
-		httpServletResponse.getWriter().write(s);
 	}
 	
 	private String handleError(HttpServletRequest request, HttpServletResponse httpServletResponse, 

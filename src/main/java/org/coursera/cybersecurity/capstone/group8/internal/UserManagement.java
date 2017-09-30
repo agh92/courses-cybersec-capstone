@@ -8,6 +8,7 @@ import org.coursera.cybersecurity.capstone.group8.internal.data.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,6 +29,7 @@ public class UserManagement implements UserDetailsService {
 
 	private Logger log = LoggerFactory.getLogger(UserManagement.class);
 	
+	@Lazy
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
@@ -68,7 +70,7 @@ public class UserManagement implements UserDetailsService {
 		UserDetails userDetails = userRepository.findOne(username);
 		log.info("User details: " + userDetails);
 		if (userDetails == null)
-			throw new UsernameNotFoundException("Username not found: \"" + username + "\"");
+			throw new UsernameNotFoundException("Username not found");
 		return userDetails;
 	}
 
@@ -85,9 +87,9 @@ public class UserManagement implements UserDetailsService {
 		msgRepository.save(encryptedMessage);
 	}
 
-	public void checkSecretAnswerMatches(User user, String secretAnswer) throws Exception {
+	public void checkSecretAnswerMatches(User user, String secretAnswer) throws UserInputException {
 		if (!passwordEncoder.matches(secretAnswer, user.getSecretHashedAnswer())) 
-			throw new Exception("Secret answer doesn't match");
+			throw new UserInputException("Secret answer doesn't match");
 	}
 
 	public void setNewPassword(User user, String password) {

@@ -26,8 +26,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
             .authorizeRequests()
                 .antMatchers("/", "/index.html", "/register.html", "/webapi/register", 
-                		"/webapi/login", "/dbdump", "/password_reset.html", 
-                		"/webapi/passwordReset", "/css/**").permitAll()
+                		"/webapi/login", "/dbdump", "/password_reset.html", "/password_reset2.html", 
+                		"/webapi/passwordReset", "/webapi/passwordReset2", 
+                		"/css/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
             .formLogin()
