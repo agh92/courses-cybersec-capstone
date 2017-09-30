@@ -68,7 +68,7 @@ public class UserManagement implements UserDetailsService {
 		UserDetails userDetails = userRepository.findOne(username);
 		log.info("User details: " + userDetails);
 		if (userDetails == null)
-			throw new UsernameNotFoundException("Username not found: \"" + username + "\"");
+			throw new UsernameNotFoundException("Username not found");
 		return userDetails;
 	}
 
@@ -85,9 +85,9 @@ public class UserManagement implements UserDetailsService {
 		msgRepository.save(encryptedMessage);
 	}
 
-	public void checkSecretAnswerMatches(User user, String secretAnswer) throws Exception {
+	public void checkSecretAnswerMatches(User user, String secretAnswer) throws UserInputException {
 		if (!passwordEncoder.matches(secretAnswer, user.getSecretHashedAnswer())) 
-			throw new Exception("Secret answer doesn't match");
+			throw new UserInputException("Secret answer doesn't match");
 	}
 
 	public void setNewPassword(User user, String password) {
