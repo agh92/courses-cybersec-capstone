@@ -10,6 +10,7 @@
     <li class="nav"><a class="nav" href="/password_reset.html">Password reset</a></li>
 </ul><br/>
 
+<span th:utext="${errormsg}" class="error"></span>
 <form action="/webapi/login" method="post">
     <label for="username">User ID</label>
     <input type="text" id="username" name="username" value="" autofocus="autofocus"/><br/>

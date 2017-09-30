@@ -106,6 +106,23 @@ public class MainController {
 	}
 
 	@ResponseBody
+    @RequestMapping(path="/loginPage", method=RequestMethod.GET)
+    public String loginPage(HttpServletRequest request,
+                                HttpServletResponse response) {
+
+        try {
+            WebContext ctx = new WebContext(request, response, request.getServletContext());
+            ctx.setVariable("errormsg", request.getParameter("error") != null ? "Login failed" : "");
+
+            return templateEngine.process("login", ctx);
+
+        } catch (Exception e) {
+			log.error(e.getMessage());
+			return handleError(request, response, e);
+        }
+    }
+
+	@ResponseBody
     @RequestMapping(path="/messageList", method=RequestMethod.GET)
     public String processMessages(@AuthenticationPrincipal User user, HttpServletRequest request,
                                 HttpServletResponse response) {
