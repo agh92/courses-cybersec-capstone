@@ -2,6 +2,10 @@ package org.coursera.cybersecurity.capstone.group8.internal;
 
 import java.util.regex.Pattern;
 
+/*
+ * Every user input has to be validated in order to avoid security flaws. There fore Instances of this class should
+ * be used to check user input for possible dangers
+ */
 public class InputSanitizer {
 	private static final Pattern PATTERN_USERNAME = Pattern.compile("[a-zA-Z0-9]+");
 	private static final Pattern PATTERN_PASSWORD = Pattern.compile("\\p{Graph}+");

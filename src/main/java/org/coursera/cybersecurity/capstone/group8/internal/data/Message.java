@@ -46,40 +46,20 @@ public class Message {
 	public long getId() {
 		return id;
 	}
-
-	public void setId(long id) {
-		this.id = id;
-	}
 	
 	public String getFromUserId() {
 		return fromUserId;
-	}
-	
-	public void setFromUserId(String fromUserId) {
-		this.fromUserId = fromUserId;
 	}
 	
 	public String getToUserId() {
 		return toUserId;
 	}
 	
-	public void setToUserId(String toUserId) {
-		this.toUserId = toUserId;
-	}
-	
 	public byte[] getEncryptedMessage() {
 		return encryptedMessage;
-	}
-	
-	public void setEncryptedMessage(byte[] encryptedMessage) {
-		this.encryptedMessage = encryptedMessage;
 	}
 
 	public long getTimestamp() {
 		return timestamp;
-	}
-
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
 	}
 }

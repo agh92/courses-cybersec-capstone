@@ -23,7 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
- * This is where we consolidate all crypto stuff
+ * This class contains all the necessary functions to encript user messages before saving them in the database
+ * and decrypt them.
  */
 public class CryptoEngine {
 	private Logger log = LoggerFactory.getLogger(CryptoEngine.class);
@@ -42,8 +43,6 @@ public class CryptoEngine {
 	
 	private SecureRandom secureRandom;
 	
-	private int saltNumberOfBytes = 8;
-	
 	@Value("${use.one.time.key:false}")
 	private boolean useOneTimeKey = true;
 	
@@ -60,7 +59,6 @@ public class CryptoEngine {
 			log.warn("Using one-time secret key, suitable only for one-time in-memory database");
 			secretKeySpec = createRandomSecretKey();
 		} else {
-			// TODO dynamically load file name/path or read from some config file - to be determined
 			Scanner scan = new Scanner(new File(encryptionKeyPath));
 			secretKeySpec = new SecretKeySpec(stringToBytes(scan.next()), keyGenAlgo);
 			scan.close();
@@ -68,58 +66,11 @@ public class CryptoEngine {
 		if (secretKeySpec == null) 
 			throw new Exception("Cannot obtain encryption key");
 	}
-	
-	public void generateAndWriteKey(File f) throws Exception {
-        SecretKeySpec secretKeySpec = createRandomSecretKey();
-        
-        Base64.Encoder encoder = Base64.getEncoder();
-        Writer out = new FileWriter(f);
-        out.write("-----BEGIN " + keyGenAlgo + " KEY-----\n");
-        out.write(encoder.encodeToString(secretKeySpec.getEncoded()));
-        out.write("\n-----END " + keyGenAlgo + " KEY-----\n");
-        out.close();
-        log.info("New random key written to " + f.getAbsolutePath());
-    }
 
 	private SecretKeySpec createRandomSecretKey() {
 		byte[] key = new byte[keySizeBytes];
         secureRandom.nextBytes(key);
-        SecretKeySpec secretKeySpec = new SecretKeySpec(key, keyGenAlgo);
-		return secretKeySpec;
-	}
-	
-	public void setKeyFromFile(File f) throws IOException {
-		this.secretKeySpec = readKeyFromFile(f);
-	}
-	
-	public SecretKeySpec readKeyFromFile(File f) throws IOException {
-		log.info("Reading key from " + f.getAbsolutePath());
-		SecretKeySpec secretKeySpec = null;
-        Base64.Decoder decoder = Base64.getDecoder();
-        StringBuilder sb = new StringBuilder();
-		BufferedReader br = new BufferedReader(new FileReader(f));
-		String line;
-		while ((line = br.readLine()) != null) {
-			if (!line.startsWith("-") && secretKeySpec == null) {
-				byte[] bytes = decoder.decode(line);
-				secretKeySpec = new SecretKeySpec(bytes, keyGenAlgo);
-			}
-			sb.append(line).append("\n");
-		}
-		br.close();
-		log.info("File content:\n" + sb.toString());
-		if (secretKeySpec == null)
-			throw new IOException("No key found in " + f);
-		return secretKeySpec;
-	}
-	
-	/*
-	 * Salt has to be random, not derived from any predictable value like user ID.
-	 */
-	public byte[] getRandomSalt() {
-		byte[] saltBytes = new byte[saltNumberOfBytes];
-		secureRandom.nextBytes(saltBytes);
-		return saltBytes;
+		return new SecretKeySpec(key, keyGenAlgo);
 	}
 	
 	/*
@@ -156,8 +107,7 @@ public class CryptoEngine {
 	public IvParameterSpec getRandomIv() {
         byte[] ivBytes = new byte[keySizeBytes];
         secureRandom.nextBytes(ivBytes);
-        IvParameterSpec iv = new IvParameterSpec(ivBytes);
-        return iv;
+        return new IvParameterSpec(ivBytes);
 	}
 	
 	public synchronized byte[] encryptString(String s) throws Exception {
@@ -180,20 +130,14 @@ public class CryptoEngine {
         byte[] bytePlainText = cipher.doFinal(cipherTextBytesNoIV);
         return bytesToString(bytePlainText);
 	}
-
-	public SecretKeySpec getSecretKeySpec() {
-		return secretKeySpec;
-	}
 	
 	public Message encryptMessage(DecryptedMessage decryptedMsg) throws Exception {
 		byte[] cipherText = encryptString(decryptedMsg.getPlainTextMessage());
-		Message encryptedMsg = new Message(decryptedMsg, cipherText);
-		return encryptedMsg;
+		return new Message(decryptedMsg, cipherText);
 	}
 	
 	public DecryptedMessage decryptMessage(Message encryptedMsg) throws Exception {
 		String plainText = decryptString(encryptedMsg.getEncryptedMessage());
-		DecryptedMessage decryptedMsg = new DecryptedMessage(encryptedMsg, plainText);
-		return decryptedMsg;
+		return new DecryptedMessage(encryptedMsg, plainText);
 	}
 }
