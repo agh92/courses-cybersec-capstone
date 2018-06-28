@@ -2,5 +2,5 @@
 
 ## Team Members
 - Alexey
-- Andrés
+- Andrés Gil Herrera
 - Aamir Nadeem
