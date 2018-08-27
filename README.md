@@ -1,4 +1,4 @@
-# (Cybersec Capstone Project)[https://www.coursera.org/learn/cyber-security-capstone/home/info] Fall 2018
+# [Cybersec Capstone Project](https://www.coursera.org/learn/cyber-security-capstone/home/info) Fall 2018
 
 > Cybersecurity Capstone Project by University of Maryland, College Park on Coursera. Certificate earned at Monday, October 16, 2017 8:46 AM GMT
 
